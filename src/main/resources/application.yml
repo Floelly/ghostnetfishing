@@ -1,3 +1,10 @@
 spring:
   application:
     name: ghostnetfishing
+  datasource:
+    url: jdbc:mysql://localhost:3307/ghostnet_test
+    username: spring-user-prod
+    password: spring-password-prod
+  jpa:
+    hibernate:
+      ddl-auto: create-only
