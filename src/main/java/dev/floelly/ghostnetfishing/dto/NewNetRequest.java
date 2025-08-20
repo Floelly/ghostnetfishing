@@ -1,6 +1,16 @@
 package dev.floelly.ghostnetfishing.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class NewNetRequest {
-    public NewNetRequest(double locationLong, double locationLat, String size) {
-    }
+    private String locationLat;
+    private String locationLong;
+    private String size;
 }

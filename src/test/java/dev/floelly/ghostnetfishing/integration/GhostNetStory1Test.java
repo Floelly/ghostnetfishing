@@ -3,6 +3,7 @@ package dev.floelly.ghostnetfishing.integration;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -78,7 +79,7 @@ public class GhostNetStory1Test {
     @Test
     void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
         double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
-        double lon = ThreadLocalRandom.current().nextDouble(-180, 180);
+        double lon = ThreadLocalRandom.current().nextDouble(-180, 180); // TODO: Floating point kann Fehler erzeugen 3.14 != 3,14
         String randomLatitude = String.format("%.4f", lat);
         String randomLongitude = String.format("%.4f", lon);
 
@@ -93,5 +94,17 @@ public class GhostNetStory1Test {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(randomLatitude)))
                 .andExpect(content().string(containsString(randomLongitude)));
+    }
+
+    @Disabled("not ready jet")
+    @Test
+    void shouldFailValidationAndStayOnForm() throws Exception {
+        mockMvc.perform(post("/nets/new")
+                        .param("locationLat", "")
+                        .param("locationLong", "")
+                        .param("size", ""))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrors("newNetRequest", "locationLat", "locationLong", "size"))
+                .andExpect(view().name("nets/new"));
     }
 }
