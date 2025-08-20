@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de"
+<html lang="en"
     xmlns:th="http://www.thymeleaf.org"
     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
@@ -21,10 +21,10 @@
                         <a class="nav-link" href="#">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" th:href="@{/nets/new}">Geisternetz melden</a>
+                        <a class="nav-link" th:href="@{/nets}">Nets</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                        <a class="nav-link" th:href="@{/nets/new}">Report</a>
                     </li>
                 </ul>
             </div>

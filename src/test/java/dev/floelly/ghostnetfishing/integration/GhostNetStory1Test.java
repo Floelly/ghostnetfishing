@@ -12,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
@@ -40,10 +42,10 @@ public class GhostNetStory1Test {
 
         MvcResult result = mockMvc.perform(get("/nets/new"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Neues Geisternetz melden")))
-                .andExpect(content().string(containsString("Breitengrad")))
-                .andExpect(content().string(containsString("Längengrad")))
-                .andExpect(content().string(containsString("Größe")))
+                .andExpect(content().string(containsString("Report new ghost net")))
+                .andExpect(content().string(containsString("Latitude")))
+                .andExpect(content().string(containsString("Longitude")))
+                .andExpect(content().string(containsString("Size")))
                 .andReturn();
         String content = result.getResponse().getContentAsString();
         Document document = Jsoup.parse(content);
@@ -80,9 +82,12 @@ public class GhostNetStory1Test {
     @Test
     void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
         double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
-        double lon = ThreadLocalRandom.current().nextDouble(-180, 180); // TODO: Floating point kann Fehler erzeugen 3.14 != 3,14
-        String randomLatitude = String.format(Locale.US, "%.4f", lat);
-        String randomLongitude = String.format(Locale.US, "%.4f", lon);
+        double lon = ThreadLocalRandom.current().nextDouble(-180, 180);
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
+        df.setDecimalSeparatorAlwaysShown(false);
+        String randomLatitude = df.format(lat);
+        String randomLongitude = df.format(lon);
 
         mockMvc.perform(post("/nets/new")
                     .param("locationLat", randomLatitude)
