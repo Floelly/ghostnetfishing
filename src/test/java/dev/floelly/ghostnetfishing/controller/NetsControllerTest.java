@@ -14,8 +14,8 @@ class NetsControllerTest {
     }
 
     @Test
-    void shouldShowNewNetForm() {
+    void shouldConnectToNewNetForm() {
         String controllerReturn = netController.getNewNetForm();
-        assertEquals(controllerReturn, "/nets/new");
+        assertEquals("nets/new", controllerReturn);
     }
 }
