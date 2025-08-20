@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html lang="de">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Ghost Net Fishing</title>
-    </head>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+
     <body>
-        <h2>Neues Geisternetz melden</h2>
-        <form action="#" method="post">
-            <h4>Bitte möglichst präzise Daten eingeben</h4>
-            <label for="new-net-latitude">Breitengrad</label>
-            <input id="new-net-latitude"
-                   name="new-net-latitude"
-                   type="number"
-                   min="-90"
-                   max="90"
-                   step="any"
-                   required>
-            <label for="new-net-longitude">Längengrad</label>
-            <input id="new-net-longitude"
-                   name="new-net-longitude"
-                   type="number"
-                   min="-180"
-                   max="180"
-                   required>
-            <label for="new-net-size">Größe</label>
-            <select id="new-net-size" name="new-net-size" required>
-                <option value="" selected disabled>- Größe auswählen -</option>
-                <option value="S">S - (Längste Seite bis 10 m)</option>
-                <option value="M">M - (Längste Seite bis 30 m)</option>
-                <option value="L">L - (Längste Seite bis 100 m)</option>
-                <option value="XL">XL - (Längste Seite über 100 m)</option>
-            </select>
-            <button>Abschicken</button>
-        </form>
+        <main layout:fragment="content">
+            <h2>Neues Geisternetz melden</h2>
+            <form action="#" method="post">
+                <h4>Bitte möglichst präzise Daten eingeben</h4>
+                <label for="new-net-latitude">Breitengrad</label>
+                <input id="new-net-latitude"
+                       name="new-net-latitude"
+                       type="number"
+                       min="-90"
+                       max="90"
+                       step="any"
+                       required>
+                <label for="new-net-longitude">Längengrad</label>
+                <input id="new-net-longitude"
+                       name="new-net-longitude"
+                       type="number"
+                       min="-180"
+                       max="180"
+                       required>
+                <label for="new-net-size">Größe</label>
+                <select id="new-net-size" name="new-net-size" required>
+                    <option value="" selected disabled>- Größe auswählen -</option>
+                    <option value="S">S - (Längste Seite bis 10 m)</option>
+                    <option value="M">M - (Längste Seite bis 30 m)</option>
+                    <option value="L">L - (Längste Seite bis 100 m)</option>
+                    <option value="XL">XL - (Längste Seite über 100 m)</option>
+                </select>
+                <button>Abschicken</button>
+            </form>
+        </main>
     </body>
 </html>
