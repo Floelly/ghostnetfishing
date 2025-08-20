@@ -50,10 +50,9 @@ public class GhostNetStory1Test {
 
         Elements inputs = form.select("input");
         assertThat(inputs.size())
-                .withFailMessage("Expects at least %d input fields, actual %d. Form HTML:\n%s",
+                .withFailMessage("Expects at least %d input fields, actual %d.",
                         amountOfInputs,
-                        inputs.size(),
-                        form.html())
+                        inputs.size())
                 .isGreaterThan(amountOfInputs - 1);
     }
 
