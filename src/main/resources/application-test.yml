@@ -6,8 +6,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-  application:
-    name: ghostnetfishing
 logging:
   level:
     org.hibernate.SQL: DEBUG

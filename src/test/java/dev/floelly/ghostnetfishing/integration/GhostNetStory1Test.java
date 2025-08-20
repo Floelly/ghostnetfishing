@@ -31,7 +31,9 @@ public class GhostNetStory1Test {
 
     @Test
     void shouldDisplayGhostNetForm() throws Exception {
-        MvcResult result = mockMvc.perform(get("/ghostnetform"))
+        int amountOfInputs = 2;
+
+        MvcResult result = mockMvc.perform(get("/nets/new"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Neues Geisternetz melden")))
                 .andExpect(content().string(containsString("Breitengrad")))
@@ -42,10 +44,17 @@ public class GhostNetStory1Test {
         Document document = Jsoup.parse(content);
 
         Elements form = document.select("form[method=post]");
-        assertThat(form).isNotEmpty();
+        assertThat(form)
+                .withFailMessage("No Form element found")
+                .isNotEmpty();
 
         Elements inputs = form.select("input");
-        assertThat(inputs.size()).isGreaterThan(2);
+        assertThat(inputs.size())
+                .withFailMessage("Expects at least %d input fields, actual %d. Form HTML:\n%s",
+                        amountOfInputs,
+                        inputs.size(),
+                        form.html())
+                .isGreaterThan(amountOfInputs - 1);
     }
 
     @Disabled("Noch nicht implementiert")
