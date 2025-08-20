@@ -2,6 +2,7 @@ package dev.floelly.ghostnetfishing.integration;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,9 +13,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
@@ -31,7 +36,7 @@ public class GhostNetStory1Test {
 
     @Test
     void shouldDisplayGhostNetForm() throws Exception {
-        int amountOfInputs = 2;
+        List<String> newNetParameters = List.of("locationLong", "locationLat", "size");
 
         MvcResult result = mockMvc.perform(get("/nets/new"))
                 .andExpect(status().isOk())
@@ -48,26 +53,47 @@ public class GhostNetStory1Test {
                 .withFailMessage("No Form element found")
                 .isNotEmpty();
 
-        Elements inputs = form.select("input");
-        assertThat(inputs.size())
-                .withFailMessage("Expects at least %d input fields, actual %d.",
-                        amountOfInputs,
-                        inputs.size())
-                .isGreaterThan(amountOfInputs - 1);
+        List<String> inputs = form.select("input, select").stream()
+                .map(e -> e.attr("name"))
+                .toList();
+        assertThat(inputs)
+                .withFailMessage("Expects inputs or selects with names '%s'. Found: '%s'", String.join(", ", newNetParameters), String.join(", ", inputs))
+                .containsAll(newNetParameters);
+
+        Elements submitButtons = form.select("button[type=submit], input[type=submit]");
+        assertThat(submitButtons)
+                .withFailMessage("Expects at least one submit button or submit input field. Found '%s'.", submitButtons.size())
+                .isNotEmpty();
+    }
+
+    @Test
+    void shouldRenderContentInLayout() throws Exception {
+        MvcResult result = mockMvc.perform(get("/nets/new"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Document doc = Jsoup.parse(result.getResponse().getContentAsString());
+        assertThat(doc.select("footer")).isNotEmpty();
     }
 
     @Disabled("Noch nicht implementiert")
     @Test
     void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
-        mockMvc.perform(get("/nets/new")
-                    .param("location_long", "8.990912")
-                    .param("location_lat", "49.655653")
+        double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
+        double lon = ThreadLocalRandom.current().nextDouble(-180, 180);
+        String randomLatitude = String.format("%.4f", lat);
+        String randomLongitude = String.format("%.4f", lon);
+
+        mockMvc.perform(post("/nets/new")
+                    .param("locationLong", randomLongitude)
+                    .param("locationLat", randomLatitude)
                     .param("size", "L"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nets"));
 
         mockMvc.perform(get("/nets"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("49.655653")));
+                .andExpect(content().string(containsString(randomLatitude)))
+                .andExpect(content().string(containsString(randomLongitude)));
     }
 }
