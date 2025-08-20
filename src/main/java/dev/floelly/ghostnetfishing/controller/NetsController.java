@@ -1,5 +1,6 @@
 package dev.floelly.ghostnetfishing.controller;
 
+import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.service.INewNetService;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.List;
+
 @Controller
 @AllArgsConstructor
 @RequestMapping("/nets")
@@ -19,6 +22,8 @@ public class NetsController {
 
     @GetMapping
     public String getNetsPage(Model model) {
+        List<NetDTO> nets = newNetService.getAll();
+        model.addAttribute("nets", nets);
         return "/nets";
     }
 

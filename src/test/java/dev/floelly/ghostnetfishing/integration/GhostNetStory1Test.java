@@ -13,10 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,7 +36,7 @@ public class GhostNetStory1Test {
 
     @Test
     void shouldDisplayGhostNetForm() throws Exception {
-        List<String> newNetParameters = List.of("locationLong", "locationLat", "size");
+        List<String> newNetParameters = List.of("locationLat", "locationLong", "size");
 
         MvcResult result = mockMvc.perform(get("/nets/new"))
                 .andExpect(status().isOk())
@@ -80,12 +81,12 @@ public class GhostNetStory1Test {
     void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
         double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
         double lon = ThreadLocalRandom.current().nextDouble(-180, 180); // TODO: Floating point kann Fehler erzeugen 3.14 != 3,14
-        String randomLatitude = String.format("%.4f", lat);
-        String randomLongitude = String.format("%.4f", lon);
+        String randomLatitude = String.format(Locale.US, "%.4f", lat);
+        String randomLongitude = String.format(Locale.US, "%.4f", lon);
 
         mockMvc.perform(post("/nets/new")
-                    .param("locationLong", randomLongitude)
                     .param("locationLat", randomLatitude)
+                    .param("locationLong", randomLongitude)
                     .param("size", "L"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/nets"));

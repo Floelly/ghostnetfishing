@@ -42,7 +42,7 @@ class NetsControllerTest {
 
     @Test
     void shouldCallServiceAndReturnRedirect_onNewNetPost() {
-        NewNetRequest newNetRequest = new NewNetRequest("20","20","L");
+        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
         doNothing().when(newNetService).addNewNet(eq(newNetRequest));
 
         String controllerResponse = netController.postNewNet(newNetRequest);
@@ -53,7 +53,7 @@ class NetsControllerTest {
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onNewNetPost(){
-        NewNetRequest newNetRequest = new NewNetRequest("20","20","L");
+        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
 
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(newNetService).addNewNet(eq(newNetRequest));

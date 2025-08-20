@@ -9,7 +9,27 @@
     </head>
     <body>
         <div layout:fragment="content">
-            <h1>Ich zeige bald mal alle Netze an</h1>
+            <h1 class="mb-3">Liste aller Geisternetze</h1>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <td>Id</td>
+                        <td>Breitengrad</td>
+                        <td>Längengrad</td>
+                        <td>Größe</td>
+                        <td>Status</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="net : ${nets}">
+                        <td th:text="*{net.id}"></td>
+                        <td th:text="*{net.locationLat}"></td>
+                        <td th:text="*{net.locationLong}"></td>
+                        <td th:text="*{net.size}"></td>
+                        <td th:text="*{net.state}"></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </body>
 </html>
