@@ -1,5 +1,8 @@
 package dev.floelly.ghostnetfishing.integration;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +10,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,13 +31,21 @@ public class GhostNetStory1Test {
 
     @Test
     void shouldDisplayGhostNetForm() throws Exception {
-        mockMvc.perform(get("/nets/new"))
+        MvcResult result = mockMvc.perform(get("/ghostnetform"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Neues Geisternetz melden")))
-                .andExpect(content().string(containsString("Standort")))
                 .andExpect(content().string(containsString("Breitengrad")))
                 .andExpect(content().string(containsString("Längengrad")))
-                .andExpect(content().string(containsString("Größe")));
+                .andExpect(content().string(containsString("Größe")))
+                .andReturn();
+        String content = result.getResponse().getContentAsString();
+        Document document = Jsoup.parse(content);
+
+        Elements form = document.select("form[method=post]");
+        assertThat(form).isNotEmpty();
+
+        Elements inputs = form.select("input");
+        assertThat(inputs.size()).isGreaterThan(2);
     }
 
     @Disabled("Noch nicht implementiert")
