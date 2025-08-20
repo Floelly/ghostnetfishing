@@ -2,9 +2,7 @@ package dev.floelly.ghostnetfishing.integration;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,10 +46,11 @@ public class GhostNetStory1Test {
         String content = result.getResponse().getContentAsString();
         Document document = Jsoup.parse(content);
 
-        Elements form = document.select("form[method=post]");
+        Elements form = document.select("form[method=post][action='/nets/new']");
         assertThat(form)
-                .withFailMessage("No Form element found")
+                .withFailMessage("No Form element with post method found.")
                 .isNotEmpty();
+
 
         List<String> inputs = form.select("input, select").stream()
                 .map(e -> e.attr("name"))
@@ -76,7 +75,6 @@ public class GhostNetStory1Test {
         assertThat(doc.select("footer")).isNotEmpty();
     }
 
-    @Disabled("Noch nicht implementiert")
     @Test
     void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
         double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
