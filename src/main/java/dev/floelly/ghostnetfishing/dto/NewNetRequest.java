@@ -26,6 +26,6 @@ public class NewNetRequest {
     @NumberFormat(style = NumberFormat.Style.NUMBER)
     private Double locationLong;
 
-    @NotNull
+    @NotNull(message = "must select one of the given sizes")
     private NetSize size;
 }

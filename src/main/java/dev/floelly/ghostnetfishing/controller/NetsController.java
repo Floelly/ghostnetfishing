@@ -9,17 +9,29 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
+import java.beans.PropertyEditorSupport;
 import java.util.List;
 
 @Controller
 @AllArgsConstructor
 @RequestMapping("/nets")
 public class NetsController {
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(NetSize.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                try {
+                    setValue(NetSize.valueOf(text));
+                } catch (IllegalArgumentException e) {
+                    setValue(null);
+                }
+            }
+        });
+    }
 
     private final INetService netService;
 
