@@ -1,5 +1,6 @@
 package dev.floelly.ghostnetfishing.dto;
 
+import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.model.NetState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +16,6 @@ public class NetDTO {
     private Double locationLat;
     @NumberFormat(style = NumberFormat.Style.NUMBER)
     private Double locationLong;
-    private String size;
+    private NetSize size;
     private NetState state;
 }

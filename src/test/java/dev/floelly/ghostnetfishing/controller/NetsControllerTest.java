@@ -2,6 +2,7 @@ package dev.floelly.ghostnetfishing.controller;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
+import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.model.NetState;
 import dev.floelly.ghostnetfishing.service.INewNetService;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class NetsControllerTest {
 
     @Test
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
-        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
+        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,NetSize.L);
         BindingResult bindingResult = new BeanPropertyBindingResult(newNetRequest, "newNet");
         Model model = new ExtendedModelMap();
         doNothing().when(newNetService).addNewNet(eq(newNetRequest));
@@ -57,7 +58,7 @@ class NetsControllerTest {
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
-        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
+        NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,NetSize.L);
         BindingResult bindingResult = new BeanPropertyBindingResult(newNetRequest, "newNet");
         Model model = new ExtendedModelMap();
 
@@ -71,7 +72,7 @@ class NetsControllerTest {
     @Test
     void shouldCallServiceAndReturnNetsContent_onGetNetsPage() {
         Model model = new ExtendedModelMap();
-        NetDTO netDTO1 = new NetDTO(5L, 20.0, 20.0, "L", NetState.RECOVERY_PENDING);
+        NetDTO netDTO1 = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING);
         when(newNetService.getAll())
                 .thenReturn(List.of(netDTO1));
 

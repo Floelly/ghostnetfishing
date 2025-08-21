@@ -1,5 +1,6 @@
 package dev.floelly.ghostnetfishing.dto;
 
+import dev.floelly.ghostnetfishing.model.NetSize;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -53,7 +54,7 @@ class NewNetRequestValidationTest {
 
     @BeforeEach
     void setUp() {
-        defaultValidRequest = new NewNetRequest(0.0, 0.0, "L");
+        defaultValidRequest = new NewNetRequest(0.0, 0.0, NetSize.L);
     }
 
     @ParameterizedTest

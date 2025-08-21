@@ -1,5 +1,6 @@
 package dev.floelly.ghostnetfishing.dto;
 
+import dev.floelly.ghostnetfishing.model.NetSize;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,5 @@ public class NewNetRequest {
     private Double locationLong;
 
     @NotNull
-    @Pattern(regexp = "S|M|L|XL", message = "Size must be one of S, M, L, XL")
-    private String size;
+    private NetSize size;
 }
