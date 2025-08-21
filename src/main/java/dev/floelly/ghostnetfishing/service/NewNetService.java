@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class NewNetService implements INewNetService {
-    private List<NetDTO> nets = new ArrayList<>();
+    private final List<NetDTO> nets = new ArrayList<>();
 
     public void addNewNet(NewNetRequest newNetRequest) {
 
