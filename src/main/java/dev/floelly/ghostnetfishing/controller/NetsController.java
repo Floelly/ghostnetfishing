@@ -32,14 +32,17 @@ public class NetsController {
 
     @GetMapping("/new")
     public String getNewNetFormPage(Model model) {
+        model.addAttribute("newNetRequest", new NewNetRequest());
         model.addAttribute("netSizes", NetSize.values());
         return "/nets/new";
     }
 
     @PostMapping("/new")
     public String postNewNet(@Valid @ModelAttribute NewNetRequest newNetRequest,
-                             BindingResult bindingResult) {
+                             BindingResult bindingResult,
+                             Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("netSizes", NetSize.values());
             return "/nets/new";
         }
         newNetService.addNewNet(newNetRequest);

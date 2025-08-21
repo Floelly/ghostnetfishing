@@ -49,9 +49,10 @@ class NetsControllerTest {
     @Test
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
+        Model model = new ExtendedModelMap();
         doNothing().when(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
-        String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult);
+        String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model);
 
         verify(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
         assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
@@ -60,12 +61,13 @@ class NetsControllerTest {
     @Test
     void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
+        Model model = new ExtendedModelMap();
 
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
         assertThrows(IllegalArgumentException.class, () ->
-                netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult));
+                netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model));
     }
 
     @Test
