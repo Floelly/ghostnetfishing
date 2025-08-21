@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,31 +37,35 @@ class NetsControllerTest {
     private NetsController netController;
 
     @Test
-    void shouldReturnNewNetsContent_onNewNetForm() {
+    void shouldReturnNewNetsContent_onGetNewNetForm() {
         String controllerResponse = netController.getNewNetFormPage();
         assertEquals(NEW_NET_CONTENT_TEMPLATE, controllerResponse, String.format("The response of the controller should be '%s'", NEW_NET_CONTENT_TEMPLATE));
     }
 
     @Test
-    void shouldCallServiceAndReturnRedirect_onNewNetPost() {
+    void shouldCallServiceAndReturnRedirect_onPostNewNet() {
         NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
+        BindingResult bindingResult = new BeanPropertyBindingResult(newNetRequest, "newNet");
+        Model model = new ExtendedModelMap();
         doNothing().when(newNetService).addNewNet(eq(newNetRequest));
 
-        String controllerResponse = netController.postNewNet(newNetRequest);
+        String controllerResponse = netController.postNewNet(newNetRequest, bindingResult, model);
 
         verify(newNetService).addNewNet(eq(newNetRequest));
         assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
     }
 
     @Test
-    void shouldThrowException_whenServiceThrowsException_onNewNetPost(){
+    void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
         NewNetRequest newNetRequest = new NewNetRequest(20.0,20.0,"L");
+        BindingResult bindingResult = new BeanPropertyBindingResult(newNetRequest, "newNet");
+        Model model = new ExtendedModelMap();
 
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(newNetService).addNewNet(eq(newNetRequest));
 
         assertThrows(IllegalArgumentException.class, () ->
-                netController.postNewNet(newNetRequest));
+                netController.postNewNet(newNetRequest, bindingResult, model));
     }
 
     @Test
