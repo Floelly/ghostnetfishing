@@ -2,6 +2,7 @@ package dev.floelly.ghostnetfishing.integration;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +31,46 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class GhostNetStory1Test {
 
+    public static final String NEW_NET_REQUEST = "newNetRequest";
+    public static final String LOCATION_LAT = "locationLat";
+    public static final String LOCATION_LONG = "locationLong";
+    public static final String SIZE = "size";
+    public static final List<String> NEW_NET_PARAMETERS = List.of(LOCATION_LAT, LOCATION_LONG, SIZE);
+    public static final String EMPTY_STRING = "";
+    public static final String NETS_NEW_ENDPOINT = "/nets/new";
+    public static final String NETS_ENDPOINT = "/nets";
+    public static final String NEW_GHOST_NET_HEADLINE = "Report new ghost net";
+    public static final String LATITUDE = "Latitude";
+    public static final String LONGITUDE = "Longitude";
+    public static final String LAYOUT_HTML_TAG = "footer";
+    public static final String NEW_NET_FORM_QUERY_SELECTOR = "form[method=post][action='" + NETS_NEW_ENDPOINT + "']";
+    private static final Map<String, String> EXPECTED_SIZE_OPTIONS = Map.of(
+            "", "- Choose size -",
+            "S", "S - (Diameter up to 10 m)",
+            "M", "M - (Diameter up to 30 m)",
+            "L", "L - (Diameter up to 100 m)",
+            "XL", "XL - (Diameter over 100 m)"
+    );
+
+    private static String formatDouble(double d) {
+        return getDoubleFormat().format(d);
+    }
+
+    private static DecimalFormat getDoubleFormat() {
+        DecimalFormat df = new DecimalFormat("#.####");
+        df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
+        df.setDecimalSeparatorAlwaysShown(false);
+        return df;
+    }
+
+    private static double getRandomLongitude() {
+        return ThreadLocalRandom.current().nextDouble(-180, 180);
+    }
+
+    private static double getRandomLatitude() {
+        return ThreadLocalRandom.current().nextDouble(-90, 90);
+    }
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -37,31 +79,28 @@ public class GhostNetStory1Test {
     }
 
     @Test
-    void shouldDisplayGhostNetForm_OnGetNewNetForm() throws Exception {
-        List<String> newNetParameters = List.of("locationLat", "locationLong", "size");
-
-        MvcResult result = mockMvc.perform(get("/nets/new"))
+    void shouldDisplayGhostNetFormWithCorrectFieldsAndButton_OnGetNewNetForm() throws Exception {
+        MvcResult result = mockMvc.perform(get(NETS_NEW_ENDPOINT))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Report new ghost net")))
-                .andExpect(content().string(containsString("Latitude")))
-                .andExpect(content().string(containsString("Longitude")))
-                .andExpect(content().string(containsString("Size")))
+                .andExpect(content().string(containsString(NEW_GHOST_NET_HEADLINE)))
+                .andExpect(content().string(containsString(LATITUDE)))
+                .andExpect(content().string(containsString(LONGITUDE)))
+                .andExpect(content().string(containsString(SIZE)))
                 .andReturn();
         String content = result.getResponse().getContentAsString();
         Document document = Jsoup.parse(content);
 
-        Elements form = document.select("form[method=post][action='/nets/new']");
+        Elements form = document.select(NEW_NET_FORM_QUERY_SELECTOR);
         assertThat(form)
                 .withFailMessage("No Form element with post method found.")
                 .isNotEmpty();
-
 
         List<String> inputs = form.select("input, select").stream()
                 .map(e -> e.attr("name"))
                 .toList();
         assertThat(inputs)
-                .withFailMessage("Expects inputs or selects with names '%s'. Found: '%s'", String.join(", ", newNetParameters), String.join(", ", inputs))
-                .containsAll(newNetParameters);
+                .withFailMessage("Expects inputs or selects with names '%s'. Found: '%s'", String.join(", ", NEW_NET_PARAMETERS), String.join(", ", inputs))
+                .containsAll(NEW_NET_PARAMETERS);
 
         Elements submitButtons = form.select("button[type=submit], input[type=submit]");
         assertThat(submitButtons)
@@ -70,33 +109,80 @@ public class GhostNetStory1Test {
     }
 
     @Test
+    void shouldDisplayCorrectSelectNode_OnGetNewNetForm() throws Exception {
+        String content = mockMvc.perform(get(NETS_NEW_ENDPOINT))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Elements form = Jsoup.parse(content).select(NEW_NET_FORM_QUERY_SELECTOR);
+        Element locationSizeElement = form.selectFirst("select[name="+SIZE+"]");
+
+        assertThat(locationSizeElement).isNotNull();
+        assertThat(locationSizeElement.hasAttr("required")).isTrue();
+
+        Elements options = locationSizeElement.select("option");
+
+        for (Element option : options) {
+            String value = option.attr("value");
+            if(value.equals(EMPTY_STRING)) {
+                assertThat(option.hasAttr("disabled")).isTrue();
+                assertThat(option.hasAttr("selected")).isTrue();
+            }
+            assertThat(EXPECTED_SIZE_OPTIONS).containsKey(value);
+            assertThat(option.text()).isEqualTo(EXPECTED_SIZE_OPTIONS.get(value));
+        }
+    }
+
+    @Test
+    void shouldDisplayCorrectInputNodes_OnGetNewNetForm() throws Exception {
+        String content = mockMvc.perform(get(NETS_NEW_ENDPOINT))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        Elements form = Jsoup.parse(content).select(NEW_NET_FORM_QUERY_SELECTOR);
+        Element locationLatElement = form.selectFirst("input[name="+LOCATION_LAT+"]");
+        Element locationLongElement = form.selectFirst("input[name="+LOCATION_LONG+"]");
+
+        assertThat(locationLatElement).isNotNull();
+        assertThat(locationLatElement.hasAttr("required")).isTrue();
+        assertThat(locationLatElement.attr("type")).isEqualTo("number");
+        assertThat(locationLatElement.attr("min")).isEqualTo("-90");
+        assertThat(locationLatElement.attr("max")).isEqualTo("90");
+        assertThat(locationLatElement.attr("step")).isEqualTo("0.0001");
+
+        assertThat(locationLongElement).isNotNull();
+        assertThat(locationLongElement.hasAttr("required")).isTrue();
+        assertThat(locationLongElement.attr("type")).isEqualTo("number");
+        assertThat(locationLongElement.attr("min")).isEqualTo("-180");
+        assertThat(locationLongElement.attr("max")).isEqualTo("180");
+        assertThat(locationLongElement.attr("step")).isEqualTo("0.0001");
+    }
+
+    @Test
     void shouldRenderContentInLayout_OnGetNewNetForm() throws Exception {
-        MvcResult result = mockMvc.perform(get("/nets/new"))
+        MvcResult result = mockMvc.perform(get(NETS_NEW_ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn();
 
         Document doc = Jsoup.parse(result.getResponse().getContentAsString());
-        assertThat(doc.select("footer")).isNotEmpty();
+        assertThat(doc.select(LAYOUT_HTML_TAG)).isNotEmpty();
     }
 
     @Test
     void shouldSaveGhostNetAndRedirectToOverview_OnPostNewNet() throws Exception {
-        double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
-        double lon = ThreadLocalRandom.current().nextDouble(-180, 180);
-        DecimalFormat df = new DecimalFormat("#.####");
-        df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
-        df.setDecimalSeparatorAlwaysShown(false);
-        String randomLatitude = df.format(lat);
-        String randomLongitude = df.format(lon);
+        double lat = getRandomLatitude();
+        double lon = getRandomLongitude();
+        String randomLatitude = formatDouble(lat);
+        String randomLongitude = formatDouble(lon);
 
-        mockMvc.perform(post("/nets/new")
-                    .param("locationLat", randomLatitude)
-                    .param("locationLong", randomLongitude)
-                    .param("size", "L"))
+        mockMvc.perform(post(NETS_NEW_ENDPOINT)
+                    .param(LOCATION_LAT, randomLatitude)
+                    .param(LOCATION_LONG, randomLongitude)
+                    .param(SIZE, "L"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/nets"));
+                .andExpect(redirectedUrl(NETS_ENDPOINT));
 
-        mockMvc.perform(get("/nets"))
+        mockMvc.perform(get(NETS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(randomLatitude)))
                 .andExpect(content().string(containsString(randomLongitude)));
@@ -104,13 +190,13 @@ public class GhostNetStory1Test {
 
     @Test
     void shouldFailValidationAndStayOnForm_whenGivenInvalidValues_OnPostNewNet() throws Exception {
-        mockMvc.perform(post("/nets/new")
-                        .param("locationLat", "")
-                        .param("locationLong", "")
-                        .param("size", ""))
+        mockMvc.perform(post(NETS_NEW_ENDPOINT)
+                        .param(LOCATION_LAT, EMPTY_STRING)
+                        .param(LOCATION_LONG, EMPTY_STRING)
+                        .param(SIZE, EMPTY_STRING))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeHasFieldErrors("newNetRequest", "locationLat", "locationLong", "size"))
-                .andExpect(view().name("/nets/new"));
+                .andExpect(model().attributeHasFieldErrors(NEW_NET_REQUEST, LOCATION_LAT, LOCATION_LONG, SIZE))
+                .andExpect(view().name(NETS_NEW_ENDPOINT));
     }
 
     @Disabled("not implemented jet")
