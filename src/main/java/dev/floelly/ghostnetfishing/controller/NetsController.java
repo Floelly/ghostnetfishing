@@ -2,6 +2,7 @@ package dev.floelly.ghostnetfishing.controller;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
+import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.service.INewNetService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -30,14 +31,14 @@ public class NetsController {
     }
 
     @GetMapping("/new")
-    public String getNewNetFormPage() {
+    public String getNewNetFormPage(Model model) {
+        model.addAttribute("netSizes", NetSize.values());
         return "/nets/new";
     }
 
     @PostMapping("/new")
     public String postNewNet(@Valid @ModelAttribute NewNetRequest newNetRequest,
-                             BindingResult bindingResult,
-                             Model model) {
+                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "/nets/new";
         }

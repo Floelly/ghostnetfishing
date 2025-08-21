@@ -46,10 +46,10 @@
                                 name="size"
                                 required>
                             <option value="" selected disabled>- Choose size -</option>
-                            <option value="S">S - (Diameter up to 10 m)</option>
-                            <option value="M">M - (Diameter up to 30 m)</option>
-                            <option value="L">L - (Diameter up to 100 m)</option>
-                            <option value="XL">XL - (Diameter over 100 m)</option>
+                            <option th:each="size : ${netSizes}"
+                                th:value="${size.name()}"
+                                th:text="|${size.name()} - (${size.description})|">
+                            </option>
                         </select>
                     </div>
                 </div>
