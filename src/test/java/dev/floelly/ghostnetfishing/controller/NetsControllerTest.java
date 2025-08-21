@@ -4,7 +4,7 @@ import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.model.NetState;
-import dev.floelly.ghostnetfishing.service.INewNetService;
+import dev.floelly.ghostnetfishing.service.INetService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +34,7 @@ class NetsControllerTest {
     public static final NetDTO VALID_NET_DTO = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING);
 
     @Mock
-    INewNetService newNetService;
+    INetService netService;
 
     @InjectMocks
     private NetsController netController;
@@ -50,11 +50,11 @@ class NetsControllerTest {
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
         Model model = new ExtendedModelMap();
-        doNothing().when(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
+        doNothing().when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
         String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model);
 
-        verify(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
+        verify(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
         assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
     }
 
@@ -64,7 +64,7 @@ class NetsControllerTest {
         Model model = new ExtendedModelMap();
 
         doThrow(new IllegalArgumentException("invalid net"))
-                .when(newNetService).addNewNet(eq(VALID_NEW_NET_REQUEST));
+                .when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
         assertThrows(IllegalArgumentException.class, () ->
                 netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model));
@@ -73,12 +73,12 @@ class NetsControllerTest {
     @Test
     void shouldCallServiceAndReturnNetsContent_onGetNetsPage() {
         Model model = new ExtendedModelMap();
-        when(newNetService.getAll())
+        when(netService.getAll())
                 .thenReturn(List.of(VALID_NET_DTO));
 
         String controllerResponse = netController.getNetsPage(model);
 
-        verify(newNetService).getAll();
+        verify(netService).getAll();
         assertEquals(NETS_CONTENT_TEMPLATE, controllerResponse);
         Object netsAttribute = model.getAttribute(NETS_THYMELEAF_ATTRIBUTE);
         assertNotNull(netsAttribute);
@@ -96,7 +96,7 @@ class NetsControllerTest {
     void shouldThrowException_whenServiceThrowsException_onGetNetsPage(){
         Model model = new ExtendedModelMap();
 
-        doThrow(new RuntimeException()).when(newNetService).getAll();
+        doThrow(new RuntimeException()).when(netService).getAll();
 
         assertThrows(RuntimeException.class, () ->
                 netController.getNetsPage(model));

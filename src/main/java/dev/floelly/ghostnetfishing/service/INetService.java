@@ -5,7 +5,7 @@ import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 
 import java.util.List;
 
-public interface INewNetService {
+public interface INetService {
     void addNewNet(NewNetRequest newNetRequest);
 
     List<NetDTO> getAll();

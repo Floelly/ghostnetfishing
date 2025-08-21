@@ -3,7 +3,7 @@ package dev.floelly.ghostnetfishing.controller;
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.model.NetSize;
-import dev.floelly.ghostnetfishing.service.INewNetService;
+import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -21,11 +21,11 @@ import java.util.List;
 @RequestMapping("/nets")
 public class NetsController {
 
-    private final INewNetService newNetService;
+    private final INetService netService;
 
     @GetMapping
     public String getNetsPage(Model model) {
-        List<NetDTO> nets = newNetService.getAll();
+        List<NetDTO> nets = netService.getAll();
         model.addAttribute("nets", nets);
         return "/nets";
     }
@@ -45,7 +45,7 @@ public class NetsController {
             model.addAttribute("netSizes", NetSize.values());
             return "/nets/new";
         }
-        newNetService.addNewNet(newNetRequest);
+        netService.addNewNet(newNetRequest);
         return "redirect:/nets";
     }
 }

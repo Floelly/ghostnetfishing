@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-public class NewNetService implements INewNetService {
+public class NetService implements INetService {
     private final List<NetDTO> nets = new ArrayList<>();
 
     public void addNewNet(NewNetRequest newNetRequest) {
