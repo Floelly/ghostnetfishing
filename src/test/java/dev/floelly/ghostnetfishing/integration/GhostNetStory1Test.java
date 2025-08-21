@@ -37,7 +37,7 @@ public class GhostNetStory1Test {
     }
 
     @Test
-    void shouldDisplayGhostNetForm() throws Exception {
+    void shouldDisplayGhostNetForm_OnGetNewNetForm() throws Exception {
         List<String> newNetParameters = List.of("locationLat", "locationLong", "size");
 
         MvcResult result = mockMvc.perform(get("/nets/new"))
@@ -70,7 +70,7 @@ public class GhostNetStory1Test {
     }
 
     @Test
-    void shouldRenderContentInLayout() throws Exception {
+    void shouldRenderContentInLayout_OnGetNewNetForm() throws Exception {
         MvcResult result = mockMvc.perform(get("/nets/new"))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -80,7 +80,7 @@ public class GhostNetStory1Test {
     }
 
     @Test
-    void shouldSaveGhostNetAndRedirectToOverview() throws Exception {
+    void shouldSaveGhostNetAndRedirectToOverview_OnPostNewNet() throws Exception {
         double lat = ThreadLocalRandom.current().nextDouble(-90, 90);
         double lon = ThreadLocalRandom.current().nextDouble(-180, 180);
         DecimalFormat df = new DecimalFormat("#.####");
@@ -102,15 +102,20 @@ public class GhostNetStory1Test {
                 .andExpect(content().string(containsString(randomLongitude)));
     }
 
-    @Disabled("not ready jet")
     @Test
-    void shouldFailValidationAndStayOnForm() throws Exception {
+    void shouldFailValidationAndStayOnForm_whenGivenInvalidValues_OnPostNewNet() throws Exception {
         mockMvc.perform(post("/nets/new")
                         .param("locationLat", "")
                         .param("locationLong", "")
                         .param("size", ""))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeHasFieldErrors("newNetRequest", "locationLat", "locationLong", "size"))
-                .andExpect(view().name("nets/new"));
+                .andExpect(view().name("/nets/new"));
+    }
+
+    @Disabled("not implemented jet")
+    @Test
+    void shouldDisplayErrorMessagesInToast_whenGivenInvalidValues_OnPostNewNet() {
+
     }
 }
