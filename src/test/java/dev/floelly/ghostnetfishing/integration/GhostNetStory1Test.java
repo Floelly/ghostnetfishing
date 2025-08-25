@@ -4,11 +4,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,6 +46,7 @@ public class GhostNetStory1Test {
     public static final String NETS_NEW_ENDPOINT = "/nets/new";
     public static final String NETS_ENDPOINT = "/nets";
     public static final String NEW_GHOST_NET_HEADLINE = "Report new ghost net";
+    public static final String SUCCESSFULLY_REPORTED_NET_MESSAGE = "New net added successfully";
     public static final String LATITUDE = "Latitude";
     public static final String LONGITUDE = "Longitude";
     public static final String LAYOUT_HTML_TAG = "footer";
@@ -224,7 +226,6 @@ public class GhostNetStory1Test {
         assertThat(errorMessages).doesNotContain(EMPTY_STRING);
     }
 
-    @Disabled("not implemented jet")
     @Test
     void shouldNotDisplayAnyToastMessage_onNetsPage() throws Exception {
         MvcResult result = mockMvc.perform(get(NETS_ENDPOINT))
@@ -240,7 +241,6 @@ public class GhostNetStory1Test {
         assertThat(toastMessages).isEmpty();
     }
 
-    @Disabled("not implemented jet")
     @Test
     void shouldDisplaySuccessInfoToastMessage_onPostNewNet() throws Exception {
         double lat = getRandomLatitude();
@@ -248,17 +248,24 @@ public class GhostNetStory1Test {
         String randomLatitude = formatDouble(lat);
         String randomLongitude = formatDouble(lon);
 
-        mockMvc.perform(post(NETS_NEW_ENDPOINT)
+        MvcResult postResult = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
                         .param(LOCATION_LONG, randomLongitude)
                         .param(SIZE, "L"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT));
-
-        MvcResult result = mockMvc.perform(get(NETS_ENDPOINT))
-                .andExpect(status().isOk())
+                .andExpect(redirectedUrl(NETS_ENDPOINT))
+                .andExpect(flash().attributeExists("toastMessages"))
                 .andReturn();
-        Document doc = Jsoup.parse(result.getResponse().getContentAsString());
+
+        MockHttpSession session = (MockHttpSession) postResult.getRequest().getSession(false);
+
+        assertThat(session).isNotNull();
+
+        MvcResult getResult = mockMvc.perform(get(NETS_ENDPOINT).session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("toastMessages"))
+                .andReturn();
+        Document doc = Jsoup.parse(getResult.getResponse().getContentAsString());
         Element toastContainer = doc.selectFirst(".toast-container");
         assertThat(toastContainer).isNotNull();
         Elements toastMessages = toastContainer.select(".toast");
@@ -267,6 +274,6 @@ public class GhostNetStory1Test {
 
         String toastHtml = Objects.requireNonNull(toastMessages.first()).toString();
 
-        assertThat(toastHtml).contains("Successfully reported net.");
+        assertThat(toastHtml).contains(SUCCESSFULLY_REPORTED_NET_MESSAGE);
     }
 }
