@@ -14,6 +14,8 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import java.util.List;
 import java.util.Objects;
@@ -50,9 +52,10 @@ class NetsControllerTest {
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
         Model model = new ExtendedModelMap();
+        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
         doNothing().when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
-        String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model);
+        String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model, redirectAttributes);
 
         verify(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
         assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
@@ -62,12 +65,13 @@ class NetsControllerTest {
     void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
         Model model = new ExtendedModelMap();
+        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
 
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
         assertThrows(IllegalArgumentException.class, () ->
-                netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model));
+                netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model, redirectAttributes));
     }
 
     @Test

@@ -2,6 +2,7 @@ package dev.floelly.ghostnetfishing.controller;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
+import dev.floelly.ghostnetfishing.dto.ToastMessageResponse;
 import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.beans.PropertyEditorSupport;
 import java.util.List;
@@ -52,12 +54,15 @@ public class NetsController {
     @PostMapping("/new")
     public String postNewNet(@Valid @ModelAttribute NewNetRequest newNetRequest,
                              BindingResult bindingResult,
-                             Model model) {
+                             Model model,
+                             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("netSizes", NetSize.values());
             return "/nets/new";
         }
         netService.addNewNet(newNetRequest);
+        List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse("New net added successfully"));
+        redirectAttributes.addFlashAttribute("toastMessages", toastMessages);
         return "redirect:/nets";
     }
 }
