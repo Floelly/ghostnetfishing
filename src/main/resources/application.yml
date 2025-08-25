@@ -2,10 +2,10 @@ spring:
   application:
     name: ghostnetfishing
   datasource:
-    url: jdbc:mysql://localhost:3307/ghostnet_test
+    url: jdbc:mysql://localhost:3306/ghostnet #In richtiger Production aus Umgebungsvariablen oder Settings nehmen
     username: spring-user-prod
     password: spring-password-prod
   jpa:
     hibernate:
-      ddl-auto: validate #TODO: "update" für erstellen
+      ddl-auto: update #TODO: "update" für erstellen
     open-in-view: true #TODO: false setzen für LazyLoadingOption?
