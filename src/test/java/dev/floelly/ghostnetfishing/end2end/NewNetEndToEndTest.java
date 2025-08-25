@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 class NewNetEndToEndTest extends AbstractMySQLContainerTest {
@@ -45,23 +46,23 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
         try (Connection conn = DriverManager.getConnection(
                 mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
             PreparedStatement ps = conn.prepareStatement(
-                    String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC LIMIT 1",
+                    String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC",
                             DB_COLUMN_LATITUDE,
                             DB_COLUMN_LONGITUDE,
                             DB_COLUMN_SIZE,
                             DB_COLUMN_NETS));
             ResultSet rs = ps.executeQuery()) {
 
-            assertThat(rs.next()).isTrue();
+            assertTrue(rs.next(), "Should persist at least one net in database");
 
             double dbLat = rs.getDouble(DB_COLUMN_LATITUDE);
             double dbLong = rs.getDouble(DB_COLUMN_LONGITUDE);
             String dbSize = rs.getString(DB_COLUMN_SIZE);
 
-            assertThat(dbLat).isEqualTo(lat);
-            assertThat(dbLong).isEqualTo(lon);
-            assertThat(dbSize).isEqualTo(size);
-            assertThat(rs.next()).isFalse();
+            assertEquals(lat, dbLat, 0.0001, "Latitude of first persisted net does not match input value");
+            assertEquals(lon, dbLong, 0.0001, "Longitude of first persisted net does not match input value");
+            assertEquals(size, dbSize, "Size of first persisted net does not match input value");
+            assertFalse(rs.next(), "Should not have more than one persisted net");
         }
 
     }
