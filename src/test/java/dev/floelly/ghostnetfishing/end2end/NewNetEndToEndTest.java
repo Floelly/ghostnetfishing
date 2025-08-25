@@ -1,6 +1,68 @@
 package dev.floelly.ghostnetfishing.end2end;
 
+import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
-class NewNetEndToEndTest {
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
+import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+class NewNetEndToEndTest extends AbstractMySQLContainerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void loadsContext() {
+
+    }
+
+    @Test
+    void persistsNewNet_onPostNewNet() throws Exception {
+        double lat = getRandomLatitude();
+        double lon = getRandomLongitude();
+        String randomLatitude = formatDouble(lat);
+        String randomLongitude = formatDouble(lon);
+        String size = "L";
+
+        int responseStatus = mockMvc.perform(post(NETS_NEW_ENDPOINT)
+                        .param(LOCATION_LAT, randomLatitude)
+                        .param(LOCATION_LONG, randomLongitude)
+                        .param(SIZE, size))
+                .andReturn()
+                .getResponse()
+                .getStatus();
+
+        assertThat(responseStatus).isLessThan(400);
+
+        try (Connection conn = DriverManager.getConnection(
+                mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
+            PreparedStatement ps = conn.prepareStatement(
+                    String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC LIMIT 1",
+                            DB_COLUMN_LATITUDE,
+                            DB_COLUMN_LONGITUDE,
+                            DB_COLUMN_SIZE,
+                            DB_COLUMN_NETS));
+            ResultSet rs = ps.executeQuery()) {
+
+            assertThat(rs.next()).isTrue();
+
+            double dbLat = rs.getDouble(DB_COLUMN_LATITUDE);
+            double dbLong = rs.getDouble(DB_COLUMN_LONGITUDE);
+            String dbSize = rs.getString(DB_COLUMN_SIZE);
+
+            assertThat(dbLat).isEqualTo(lat);
+            assertThat(dbLong).isEqualTo(lon);
+            assertThat(dbSize).isEqualTo(size);
+            assertThat(rs.next()).isFalse();
+        }
+
+    }
 }

@@ -7,5 +7,5 @@ spring:
     password: spring-password-prod
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate #TODO: "update" für erstellen
     open-in-view: true #TODO: false setzen für LazyLoadingOption?

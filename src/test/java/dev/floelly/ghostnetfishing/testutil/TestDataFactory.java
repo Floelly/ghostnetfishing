@@ -33,6 +33,10 @@ public final class TestDataFactory {
             "L", "L - (Diameter up to 100 m)",
             "XL", "XL - (Diameter over 100 m)"
     );
+    public static final String DB_COLUMN_LATITUDE = "location_lat";
+    public static final String DB_COLUMN_LONGITUDE = "location_long";
+    public static final String DB_COLUMN_SIZE = "size";
+    public static final String DB_COLUMN_NETS = "nets";
 
     public static String formatDouble(double d) {
         return getDoubleFormat().format(d);
