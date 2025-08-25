@@ -12,9 +12,7 @@ import org.springframework.format.annotation.NumberFormat;
 @NoArgsConstructor
 public class NetDTO {
     private Long id;
-    @NumberFormat(style = NumberFormat.Style.NUMBER)
     private Double locationLat;
-    @NumberFormat(style = NumberFormat.Style.NUMBER)
     private Double locationLong;
     private NetSize size;
     private NetState state;
