@@ -3,6 +3,7 @@ package dev.floelly.ghostnetfishing.end2end;
 import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Connection;
@@ -15,6 +16,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+@SpringBootTest
 class NewNetEndToEndTest extends AbstractMySQLContainerTest {
 
     @Autowired
@@ -44,7 +46,7 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
         assertThat(responseStatus).isLessThan(400);
 
         try (Connection conn = DriverManager.getConnection(
-                mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
+                MYSQL_CONTAINER.getJdbcUrl(), MYSQL_CONTAINER.getUsername(), MYSQL_CONTAINER.getPassword());
             PreparedStatement ps = conn.prepareStatement(
                     String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC",
                             DB_COLUMN_LATITUDE,
