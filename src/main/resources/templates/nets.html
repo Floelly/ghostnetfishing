@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-        layout:decorate="~{layout/main}">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}" >
     <head>
         <meta charset="UTF-8">
         <title>All Nets Content</title>
@@ -13,38 +14,51 @@
                 <h1>Ghost Nets</h1>
                 <p>List of all currently reported ghost nets.</p>
             </div>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <td>Id</td>
-                        <td>Latitude</td>
-                        <td>Longitude</td>
-                        <td>Size</td>
-                        <td>Status</td>
-                        <td></td>
-                        <td style="display: none"></td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="net : ${nets}" th:attr="data-net-id=${net.id}">
-                        <td th:text="${net.id}"></td>
-                        <td th:text="${#numbers.formatDecimal(net.locationLat, 1, 4)}"></td>
-                        <td th:text="${#numbers.formatDecimal(net.locationLong, 1, 4)}"></td>
-                        <td th:text="${net.size}"></td>
-                        <td th:text="${net.state}"></td>
-                        <td>
-                            <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED'}">
-                                <button type="submit" class="btn btn-sm btn-primary">Mark for Recovery</button>
-                            </form>
-                        </td>
-                        <td style="display: none !important">
-                            <form th:action="@{/nets/{id}/call-lost(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED' || net.state.name() == 'RECOVERY_PENDING'}">
-                                <button type="submit" class="btn btn-sm btn-primary">Mark as Lost</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
+                <form th:action="@{/nets}" method="get" class="d-flex gap-3">
+                    <select name="state" onchange="this.form.submit()" class="ms-auto">
+                        <option value="" th:selected="${param.state != null && param.state[0] != ''}">... filter for net status</option>
+                        <option th:each="state : ${T(dev.floelly.ghostnetfishing.model.NetState).values()}"
+                                th:value="${state.name}"
+                                th:text="${state.name}"
+                                th:selected="${param.state != null and param.state[0] == state.name()}">
+                    </select>
+                </form>
+            </div>
+            <div>
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <td>Id</td>
+                            <td>Latitude</td>
+                            <td>Longitude</td>
+                            <td>Size</td>
+                            <td>Status</td>
+                            <td></td>
+                            <td style="display: none"></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="net : ${nets}" th:attr="data-net-id=${net.id}">
+                            <td th:text="${net.id}"></td>
+                            <td th:text="${#numbers.formatDecimal(net.locationLat, 1, 4)}"></td>
+                            <td th:text="${#numbers.formatDecimal(net.locationLong, 1, 4)}"></td>
+                            <td th:text="${net.size}"></td>
+                            <td th:text="${net.state}"></td>
+                            <td>
+                                <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED'}">
+                                    <button type="submit" class="btn btn-sm btn-primary">Mark for Recovery</button>
+                                </form>
+                            </td>
+                            <td style="display: none !important">
+                                <form th:action="@{/nets/{id}/call-lost(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED' || net.state.name() == 'RECOVERY_PENDING'}">
+                                    <button type="submit" class="btn btn-sm btn-primary">Mark as Lost</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </body>
 </html>
