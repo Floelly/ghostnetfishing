@@ -1,5 +1,6 @@
 package dev.floelly.ghostnetfishing.security;
 
+import dev.floelly.ghostnetfishing.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,7 +23,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/", "/nets", "/nets/new").permitAll()
                         .requestMatchers(HttpMethod.POST, "/nets/new").permitAll() //TODO: add "/nets/{id}/call-lost" later
-                        .requestMatchers(HttpMethod.POST, "/nets/{id}/request-recovery").hasRole("STANDARD")
+                        .requestMatchers(HttpMethod.POST, "/nets/{id}/request-recovery").hasRole(Role.STANDARD.name())
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.loginPage("/login").permitAll());
