@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
@@ -82,5 +83,38 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
                 .orElseThrow(() -> new AssertionError("No Net found for net Id: " + netId));
         String rowEntries = netRow.select("td").text();
         assertThat(rowEntries).as(String.format("Net status should be %s", RECOVERY_PENDING)).contains(RECOVERY_PENDING);
+    }
+
+    @Disabled("not finished jet")
+    @Test
+    @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
+    void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
+        String invalidNetId = "invalidNetId";
+        MvcResult requestRecoveryResult = mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(invalidNetId)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(NETS_ENDPOINT))
+                .andReturn();
+        String redirectedUrlOnRequestRecovery = requestRecoveryResult.getResponse().getRedirectedUrl();
+        assertNotNull(redirectedUrlOnRequestRecovery);
+
+        MockHttpSession session = (MockHttpSession) requestRecoveryResult.getRequest().getSession(false);
+
+        Assertions.assertThat(session).isNotNull();
+
+        MvcResult getResult = mockMvc.perform(get(redirectedUrlOnRequestRecovery).session(session))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("toastMessages"))
+                .andReturn();
+        Document doc = Jsoup.parse(getResult.getResponse().getContentAsString());
+        Element toastContainer = doc.selectFirst(".toast-container");
+        Assertions.assertThat(toastContainer).isNotNull();
+        Elements toastMessages = toastContainer.select(".toast");
+
+        Assertions.assertThat(toastMessages).size().isEqualTo(1);
+
+        String toastHtml = Objects.requireNonNull(toastMessages.first()).toString();
+
+        Assertions.assertThat(toastHtml).contains(String.format(COULD_NOT_MATCH_ID_ERROR_MESSAGE, invalidNetId, "net id"));
     }
 }
