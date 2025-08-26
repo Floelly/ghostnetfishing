@@ -121,12 +121,12 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     @Disabled("not Implemented jet")
     @Test
     void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() {
-        //TODO: implement
+        //TODO: implement. functionality already implemented
     }
 
     @Disabled("not Implemented jet")
     @Test
     void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery() {
-        //TODO: implement
+        //TODO: implement. functionality already implemented
     }
 }
