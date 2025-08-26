@@ -2,10 +2,14 @@ package dev.floelly.ghostnetfishing.service;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
+import dev.floelly.ghostnetfishing.model.IllegalNetStateChangeException;
 import dev.floelly.ghostnetfishing.model.Net;
+import dev.floelly.ghostnetfishing.model.NetNotFoundException;
+import dev.floelly.ghostnetfishing.model.NetState;
 import dev.floelly.ghostnetfishing.repository.NetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +42,13 @@ public class NetService implements INetService {
     }
 
     @Override
+    @Transactional
     public void requestRecovery(Long id) {
-
+        Net net = netRepository.findByNetId(id).orElseThrow(() -> new NetNotFoundException(id));
+        if(!net.getState().equals(NetState.REPORTED)){
+            throw new IllegalNetStateChangeException(id, net.getState(), NetState.RECOVERY_PENDING);
+        }
+        net.setState(NetState.RECOVERY_PENDING);
+        netRepository.save(net);
     }
 }

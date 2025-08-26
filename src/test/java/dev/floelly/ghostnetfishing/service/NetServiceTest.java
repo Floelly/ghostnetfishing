@@ -2,22 +2,27 @@ package dev.floelly.ghostnetfishing.service;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
-import dev.floelly.ghostnetfishing.model.Net;
-import dev.floelly.ghostnetfishing.model.NetSize;
-import dev.floelly.ghostnetfishing.model.NetState;
+import dev.floelly.ghostnetfishing.model.*;
 import dev.floelly.ghostnetfishing.repository.NetRepository;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NetServiceTest {
@@ -58,7 +63,7 @@ class NetServiceTest {
     }
 
     @Test
-    void getAll_shouldReturnAllSavedNetDTOs() {
+    void shouldReturnAllSavedNetDTOs_onGetAll() {
         Net net1 = new Net( null, 123L,1.0, 2.0, NetSize.L, NetState.REPORTED);
         Net net2 = new Net(null, 456L, 3.0, 4.0, NetSize.M, NetState.RECOVERY_PENDING);
         when(netRepository.findAll()).thenReturn(List.of(net1, net2));
@@ -78,5 +83,77 @@ class NetServiceTest {
                 .as("Second DTO should match second entity")
                 .extracting(NetDTO::getId, NetDTO::getLocationLat, NetDTO::getLocationLong, NetDTO::getSize, NetDTO::getState)
                 .containsExactly(net2.getNetId(), net2.getLocationLat(), net2.getLocationLong(), net2.getSize(), net2.getState());
+    }
+
+    @Test
+    void shouldUpdateRepository_whenNetStateIsReported_onRequestRecovery() {
+        // given
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Net databaseNet = createDefaultNet(netId, NetState.REPORTED);
+
+        // when
+        when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
+        netService.requestRecovery(netId);
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+
+        ArgumentCaptor<Net> netCaptor = ArgumentCaptor.forClass(Net.class);
+        verify(netRepository).save(netCaptor.capture());
+
+        Net updatedNet = netCaptor.getValue();
+        assertThat(updatedNet.getNetId())
+                .as("Net id of the saved net should match the request")
+                .isEqualTo(databaseNet.getNetId());
+
+        assertThat(updatedNet.getLocationLat())
+                .as("Latitude of the saved net should match the request")
+                .isEqualTo(databaseNet.getLocationLat());
+
+        assertThat(updatedNet.getLocationLong())
+                .as("Longitude of the saved net should match the request")
+                .isEqualTo(databaseNet.getLocationLong());
+
+        assertThat(updatedNet.getSize())
+                .as("Size of the saved net should match the request")
+                .isEqualTo(databaseNet.getSize());
+
+        assertThat(updatedNet.getState())
+                .as("State of the saved net should be REPORTED by default")
+                .isEqualTo(NetState.RECOVERY_PENDING);
+    }
+
+    @Test
+    void shouldThrowNetNotFoundException_whenNoNetWithNetId_OnRequestRecovery() {
+        // given
+        Long netId = 0L;
+
+        //when
+        when(netRepository.findByNetId(any())).thenReturn(Optional.empty());
+        assertThrows(NetNotFoundException.class, () -> netService.requestRecovery(netId));
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+        verify(netRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = NetState.class, names = {"LOST", "RECOVERED", "RECOVERY_PENDING"})
+    void shouldThrowIllegalNetStateChange_whenInvalidState_onRequestRecovery(NetState state) {
+        // given
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Net databaseNet = createDefaultNet(netId, state);
+
+        when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
+
+        // when / then
+        assertThrows(IllegalNetStateChangeException.class, () -> netService.requestRecovery(netId));
+
+        verify(netRepository).findByNetId(eq(netId));
+        verify(netRepository, never()).save(any());
+    }
+
+    private static @NotNull Net createDefaultNet(Long netId, NetState netState) {
+        return new Net(null, netId, 1.0, 2.0, NetSize.L, netState);
     }
 }
