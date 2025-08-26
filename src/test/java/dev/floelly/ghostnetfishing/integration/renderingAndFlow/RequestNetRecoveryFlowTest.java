@@ -85,12 +85,11 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
         assertThat(rowEntries).as(String.format("Net status should be %s", RECOVERY_PENDING)).contains(RECOVERY_PENDING);
     }
 
-    @Disabled("not finished jet")
     @Test
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
     void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
         String invalidNetId = "invalidNetId";
-        MvcResult requestRecoveryResult = mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(invalidNetId)))
+        MvcResult requestRecoveryResult = mockMvc.perform(post("/nets/" + invalidNetId + "/request-recovery")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(NETS_ENDPOINT))
@@ -115,6 +114,19 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
 
         String toastHtml = Objects.requireNonNull(toastMessages.first()).toString();
 
-        Assertions.assertThat(toastHtml).contains(String.format(COULD_NOT_MATCH_ID_ERROR_MESSAGE, invalidNetId, "net id"));
+        Assertions.assertThat(toastHtml).contains(invalidNetId);
+        Assertions.assertThat(toastHtml).contains("parameter");
+    }
+
+    @Disabled("not Implemented jet")
+    @Test
+    void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() {
+        //TODO: implement
+    }
+
+    @Disabled("not Implemented jet")
+    @Test
+    void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery() {
+        //TODO: implement
     }
 }
