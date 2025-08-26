@@ -5,7 +5,9 @@ import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.dto.ToastMessageResponse;
 import dev.floelly.ghostnetfishing.dto.ToastType;
 import dev.floelly.ghostnetfishing.model.NetSize;
+import dev.floelly.ghostnetfishing.model.NetState;
 import dev.floelly.ghostnetfishing.service.INetService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -34,13 +36,23 @@ public class NetsController {
                 }
             }
         });
+        binder.registerCustomEditor(NetState.class,  new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                try {
+                    setValue(NetState.valueOf(text));
+                } catch (IllegalArgumentException e) {
+                    setValue(null);
+                }
+            }
+        });
     }
 
     private final INetService netService;
 
     @GetMapping
-    public String getNetsPage(Model model) {
-        List<NetDTO> nets = netService.getAll();
+    public String getNetsPage(Model model, @RequestParam @Valid @Nullable NetState state) {
+        List<NetDTO> nets = state == null ? netService.getAll() : netService.getAllByState(state);
         model.addAttribute("nets", nets);
         return "/nets";
     }

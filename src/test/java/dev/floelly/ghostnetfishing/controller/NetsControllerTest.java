@@ -82,7 +82,7 @@ class NetsControllerTest {
         when(netService.getAll())
                 .thenReturn(List.of(VALID_NET_DTO));
 
-        String controllerResponse = netController.getNetsPage(model);
+        String controllerResponse = netController.getNetsPage(model, null);
 
         verify(netService).getAll();
         assertEquals(NETS_CONTENT_TEMPLATE, controllerResponse);
@@ -105,7 +105,7 @@ class NetsControllerTest {
         doThrow(new RuntimeException()).when(netService).getAll();
 
         assertThrows(RuntimeException.class, () ->
-                netController.getNetsPage(model));
+                netController.getNetsPage(model, null));
     }
 
     @Test

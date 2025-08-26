@@ -51,4 +51,9 @@ public class NetService implements INetService {
         net.setState(NetState.RECOVERY_PENDING);
         netRepository.save(net);
     }
+
+    @Override
+    public List<NetDTO> getAllByState(NetState state) {
+        return getAll().stream().filter(net -> net.getState().equals(state)).collect(Collectors.toList());
+    }
 }
