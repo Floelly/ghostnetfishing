@@ -9,4 +9,6 @@ public interface INetService {
     void addNewNet(NewNetRequest newNetRequest);
 
     List<NetDTO> getAll();
+
+    void requestRecovery(Long id);
 }

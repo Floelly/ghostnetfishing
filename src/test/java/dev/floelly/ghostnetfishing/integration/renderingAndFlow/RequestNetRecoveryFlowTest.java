@@ -1,15 +1,19 @@
 package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
+import org.assertj.core.api.Assertions;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Objects;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -20,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
-    private static final Long NET_ID = 0L;
+    public static final String RECOVERY_PENDING = "RECOVERY_PENDING";
 
     @Autowired
     private MockMvc mockMvc;
@@ -77,6 +81,6 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("No Net found for net Id: " + netId));
         String rowEntries = netRow.select("td").text();
-        assertThat(rowEntries).as("Net status should be RECOVERY_PENDING").contains("RECOVERY_PENDING");
+        assertThat(rowEntries).as(String.format("Net status should be %s", RECOVERY_PENDING)).contains(RECOVERY_PENDING);
     }
 }

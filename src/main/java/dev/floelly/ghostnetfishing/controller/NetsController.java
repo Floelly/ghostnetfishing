@@ -7,7 +7,6 @@ import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -69,6 +68,7 @@ public class NetsController {
 
     @PostMapping("/{id}/request-recovery")
     public String requestNetRecovery(@PathVariable long id) {
+        netService.requestRecovery(id);
         return "redirect:/nets";
     }
 }

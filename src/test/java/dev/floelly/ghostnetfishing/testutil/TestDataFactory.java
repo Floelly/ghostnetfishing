@@ -40,6 +40,7 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_SIZE = "size";
     public static final String DB_COLUMN_NETS = "nets";
     public static final String STANDARD_ROLE = "STANDARD";
+    public static final String COULD_NOT_MATCH_ID_ERROR_MESSAGE = "Url parameter '%s' is not valid. Need valid '%s'";
 
     public static String formatDouble(double d) {
         return getDoubleFormat().format(d);

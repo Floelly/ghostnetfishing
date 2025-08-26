@@ -24,7 +24,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="net : ${nets}">
+                    <tr th:each="net : ${nets}" th:attr="data-net-id=${net.id}">
                         <td th:text="${net.id}"></td>
                         <td th:text="${#numbers.formatDecimal(net.locationLat, 1, 4)}"></td>
                         <td th:text="${#numbers.formatDecimal(net.locationLong, 1, 4)}"></td>

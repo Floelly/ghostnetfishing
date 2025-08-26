@@ -36,4 +36,9 @@ public class NetService implements INetService {
                         net.getState())
                 ).collect(Collectors.toList());
     }
+
+    @Override
+    public void requestRecovery(Long id) {
+
+    }
 }

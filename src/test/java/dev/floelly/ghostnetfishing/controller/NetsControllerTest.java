@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,7 @@ class NetsControllerTest {
     private final static String NEW_NET_CONTENT_TEMPLATE = "/nets/new";
     private static final String NETS_CONTENT_TEMPLATE = "/nets";
     private static final String POST_NEW_NET_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    private static final String REQUEST_RECOVERY_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
 
     private static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
     public static final NewNetRequest VALID_NEW_NET_REQUEST = new NewNetRequest(20.0, 20.0, NetSize.L);
@@ -104,5 +106,24 @@ class NetsControllerTest {
 
         assertThrows(RuntimeException.class, () ->
                 netController.getNetsPage(model));
+    }
+
+    @Test
+    void shouldThrowException_whenServiceThrowsException_onRequestNetRecovery() {
+        doThrow(new RuntimeException()).when(netService).requestRecovery(any());
+
+        assertThrows(RuntimeException.class, () ->
+                netController.requestNetRecovery(5L));
+    }
+
+    @Test
+    void shouldCallServiceAndReturnRedirect_onRequestNetRecovery() {
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        doNothing().when(netService).requestRecovery(eq(netId));
+
+        String controllerResponse = netController.requestNetRecovery(netId);
+
+        verify(netService).requestRecovery(eq(netId));
+        assertEquals("redirect:" + REQUEST_RECOVERY_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", REQUEST_RECOVERY_REDIRECT_TEMPLATE));
     }
 }

@@ -48,7 +48,9 @@ public class PostNewNetFlowTest extends AbstractH2Test {
         mockMvc.perform(get(NETS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(randomLatitude)))
-                .andExpect(content().string(containsString(randomLongitude)));
+                .andExpect(content().string(containsString(randomLongitude)))
+                .andExpect(content().string(containsString("L")))
+                .andExpect(content().string(containsString("REPORTED")));
     }
 
     @Test
