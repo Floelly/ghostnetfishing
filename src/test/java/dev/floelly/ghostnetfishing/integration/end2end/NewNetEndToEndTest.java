@@ -1,4 +1,4 @@
-package dev.floelly.ghostnetfishing.end2end;
+package dev.floelly.ghostnetfishing.integration.end2end;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
 import org.junit.jupiter.api.Test;
