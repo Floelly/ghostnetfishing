@@ -1,6 +1,7 @@
 package dev.floelly.ghostnetfishing.controller;
 
 import dev.floelly.ghostnetfishing.dto.ToastMessageResponse;
+import dev.floelly.ghostnetfishing.dto.ToastType;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -14,7 +15,7 @@ public class GlobalControllerAdvice {
     public String handleTypeMismatch(MethodArgumentTypeMismatchException ex, RedirectAttributes redirectAttributes) {
         String message = String.format("Invalid value '%s' for parameter '%s'. Required type: '%s'", ex.getValue(), ex.getName(), ex.getRequiredType());
         redirectAttributes.addFlashAttribute("toastMessages",
-                List.of(new ToastMessageResponse(message)));
+                List.of(new ToastMessageResponse(message, ToastType.ERROR)));
         return "redirect:/nets";
     }
 }

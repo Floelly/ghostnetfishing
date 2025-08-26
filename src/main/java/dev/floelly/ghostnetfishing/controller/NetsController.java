@@ -3,6 +3,7 @@ package dev.floelly.ghostnetfishing.controller;
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.dto.ToastMessageResponse;
+import dev.floelly.ghostnetfishing.dto.ToastType;
 import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.validation.Valid;
@@ -61,7 +62,7 @@ public class NetsController {
             return "/nets/new";
         }
         netService.addNewNet(newNetRequest);
-        List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse("New net added successfully"));
+        List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse("New net added successfully", ToastType.SUCCESS));
         redirectAttributes.addFlashAttribute("toastMessages", toastMessages);
         return "redirect:/nets";
     }

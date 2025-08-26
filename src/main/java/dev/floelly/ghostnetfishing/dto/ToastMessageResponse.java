@@ -11,4 +11,14 @@ import lombok.Setter;
 @Setter
 public class ToastMessageResponse {
     private String message;
+    private ToastType type;
+
+    public String getAdditionalToastClasses() {
+        return switch (type) {
+            case ERROR -> "bg-danger text-white";
+            case WARNING -> "bg-warning text-white";
+            case SUCCESS -> "bg-success text-white";
+            default -> "bg-info";
+        };
+    }
 }
