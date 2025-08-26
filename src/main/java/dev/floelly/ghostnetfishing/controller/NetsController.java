@@ -7,6 +7,7 @@ import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -63,6 +64,11 @@ public class NetsController {
         netService.addNewNet(newNetRequest);
         List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse("New net added successfully"));
         redirectAttributes.addFlashAttribute("toastMessages", toastMessages);
+        return "redirect:/nets";
+    }
+
+    @PostMapping("/{id}/request-recovery")
+    public String requestNetRecovery(@PathVariable long id) {
         return "redirect:/nets";
     }
 }

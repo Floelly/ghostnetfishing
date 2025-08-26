@@ -39,7 +39,7 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_LONGITUDE = "location_long";
     public static final String DB_COLUMN_SIZE = "size";
     public static final String DB_COLUMN_NETS = "nets";
-    public static final String STANDARD_ROLE = "ROLE_USER";
+    public static final String STANDARD_ROLE = "STANDARD";
 
     public static String formatDouble(double d) {
         return getDoubleFormat().format(d);

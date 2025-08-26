@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
@@ -38,7 +39,8 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
         int responseStatus = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
                         .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, size))
+                        .param(SIZE, size)
+                        .with(csrf()))
                 .andReturn()
                 .getResponse()
                 .getStatus();

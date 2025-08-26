@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,7 +40,8 @@ public class PostNewNetFlowTest extends AbstractH2Test {
         mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
                         .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, "L"))
+                        .param(SIZE, "L")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(NETS_ENDPOINT));
 
@@ -54,7 +56,8 @@ public class PostNewNetFlowTest extends AbstractH2Test {
         mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, EMPTY_STRING)
                         .param(LOCATION_LONG, EMPTY_STRING)
-                        .param(SIZE, EMPTY_STRING))
+                        .param(SIZE, EMPTY_STRING)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeHasFieldErrors(NEW_NET_REQUEST, LOCATION_LAT, LOCATION_LONG, SIZE))
                 .andExpect(view().name(NETS_NEW_ENDPOINT));
@@ -65,7 +68,8 @@ public class PostNewNetFlowTest extends AbstractH2Test {
         String content = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, WRONG_NET_LOCATION_LAT)
                         .param(LOCATION_LONG, WRONG_NET_LOCATION_LONG)
-                        .param(SIZE, WRONG_NET_SIZE))
+                        .param(SIZE, WRONG_NET_SIZE)
+                        .with(csrf()))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -89,7 +93,8 @@ public class PostNewNetFlowTest extends AbstractH2Test {
         MvcResult postResult = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
                         .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, "L"))
+                        .param(SIZE, "L")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(NETS_ENDPOINT))
                 .andExpect(flash().attributeExists("toastMessages"))
