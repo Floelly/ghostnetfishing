@@ -54,6 +54,10 @@ public abstract class AbstractMySQLContainerTest {
             ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[]{"TABLE"});
             while(rs.next()){
                 String table = rs.getString("TABLE_NAME");
+                // behalte users und authorities
+                if(table.equals("users") || table.equals("authorities")){
+                    continue;
+                }
                 stmt.execute("TRUNCATE TABLE " + table);
             }
             stmt.execute("SET FOREIGN_KEY_CHECKS = 1");

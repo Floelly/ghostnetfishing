@@ -9,3 +9,8 @@ spring:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+  sql:
+    init:
+      mode: always
+      platform: mysql
