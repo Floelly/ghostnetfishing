@@ -7,10 +7,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-logging:
-  level:
-    org.hibernate.SQL: DEBUG
-
   sql:
     init:
       mode: never
+logging:
+  level:
+    org.hibernate.SQL: DEBUG

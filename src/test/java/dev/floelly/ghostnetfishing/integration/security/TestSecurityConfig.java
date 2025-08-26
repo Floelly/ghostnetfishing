@@ -16,6 +16,7 @@ public class TestSecurityConfig {
     @Bean
     @Profile("h2-test")
     public UserDetailsService userDetailsService() {
+        @SuppressWarnings("deprecation")
         UserDetails user = User.withDefaultPasswordEncoder()
                 .username("user")
                 .password("password")
