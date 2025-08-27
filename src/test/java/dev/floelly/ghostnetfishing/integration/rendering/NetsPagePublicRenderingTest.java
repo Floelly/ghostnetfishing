@@ -1,7 +1,6 @@
-package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
+package dev.floelly.ghostnetfishing.integration.rendering;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -13,20 +12,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.stream.Stream;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 //TODO: More tests for Layout and Accessibility
-public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
+public class NetsPagePublicRenderingTest extends AbstractH2Test {
 
     private Element reportedNetRow;
     private Element recoveryPendingNetRow;
@@ -38,10 +35,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
 
     @BeforeAll
     public void setUp() throws Exception {
-        MvcResult result = mockMvc.perform(get(NETS_ENDPOINT)
-                        .with(user("user").roles(STANDARD_ROLE)))
-                .andReturn();
-        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Document document = sendGetRequestToNetsPage(mockMvc);
         Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);
         reportedNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_NET_ID));
         recoveryPendingNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERY_PENDING_NET_ID));
@@ -54,46 +48,34 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
     }
 
     @ParameterizedTest
-    @MethodSource("requestRecoveryFormRowProvider")
-    void shouldRenderRequestRecoveryButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+    @MethodSource("rowProvider")
+    void shouldNotRenderRequestRecoveryButton_whenNotLoggedIn_onNetsPage(Element row) {
         Element form = row.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
-        assertNotNull(form);
-        assertThat(form.attr("action")).isEqualTo(formAction);
-        assertContainsSubmitButton(form, disabled);
+        assertNull(form);
     }
 
     @ParameterizedTest
-    @MethodSource("markRecoveredFormRowProvider")
-    void shouldRenderMarkRecoveredButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+    @MethodSource("rowProvider")
+    void shouldNotRenderMarkRecoveredButton_whenNotLoggedIn_onNetsPage(Element row) {
         Element form = row.selectFirst(MARK_RECOVERED_FORM_QUERY);
-        assertNotNull(form);
-        assertThat(form.attr("action")).isEqualTo(formAction);
-        assertContainsSubmitButton(form, disabled);
+        assertNull(form);
     }
 
     @ParameterizedTest
     @MethodSource("markLostFormRowProvider")
-    void shouldRenderMarkLostButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+    void shouldRenderMarkLostButtonWithCorrectPostAction_whenNotLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
         Element form = row.selectFirst(MARK_LOST_FORM_QUERY);
         assertNotNull(form);
         assertThat(form.attr("action")).isEqualTo(formAction);
         assertContainsSubmitButton(form, disabled);
     }
 
-    public Stream<Arguments> requestRecoveryFormRowProvider() {
+    public Stream<Arguments> rowProvider() {
         return Stream.of(
-                Arguments.of(reportedNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
-                Arguments.of(recoveryPendingNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), true),
-                Arguments.of(recoveredNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
-                Arguments.of(lostNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
-        );
-    }
-    public Stream<Arguments> markRecoveredFormRowProvider() {
-        return Stream.of(
-                Arguments.of(reportedNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), true),
-                Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), false),
-                Arguments.of(recoveredNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
-                Arguments.of(lostNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
+                Arguments.of(reportedNetRow),
+                Arguments.of(recoveryPendingNetRow),
+                Arguments.of(recoveredNetRow),
+                Arguments.of(lostNetRow)
         );
     }
 

@@ -1,4 +1,4 @@
-package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
+package dev.floelly.ghostnetfishing.integration.flow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
 import dev.floelly.ghostnetfishing.testutil.TestDataFactory;
