@@ -46,19 +46,19 @@ class NetServiceTest {
 
         Net savedNet = netCaptor.getValue();
         assertThat(savedNet.getLocationLat())
-                .as("Latitude of the saved net should match the request")
+                .as("Latitude of the saved net should match the size of request object")
                 .isEqualTo(request.getLocationLat());
 
         assertThat(savedNet.getLocationLong())
-                .as("Longitude of the saved net should match the request")
+                .as("Longitude of the saved net should match the size of request object")
                 .isEqualTo(request.getLocationLong());
 
         assertThat(savedNet.getSize())
-                .as("Size of the saved net should match the request")
+                .as("Size of the saved net should match the size of request object")
                 .isEqualTo(request.getSize());
 
         assertThat(savedNet.getState())
-                .as("State of the saved net should be REPORTED by default")
+                .as("net state should be '"+NetState.REPORTED+"' by default.")
                 .isEqualTo(NetState.REPORTED);
     }
 
@@ -103,23 +103,23 @@ class NetServiceTest {
 
         Net updatedNet = netCaptor.getValue();
         assertThat(updatedNet.getNetId())
-                .as("Net id of the saved net should match the request")
+                .as("net id shouldn't change")
                 .isEqualTo(databaseNet.getNetId());
 
         assertThat(updatedNet.getLocationLat())
-                .as("Latitude of the saved net should match the request")
+                .as("net latitude shouldn't change")
                 .isEqualTo(databaseNet.getLocationLat());
 
         assertThat(updatedNet.getLocationLong())
-                .as("Longitude of the saved net should match the request")
+                .as("net longitude shouldn't change")
                 .isEqualTo(databaseNet.getLocationLong());
 
         assertThat(updatedNet.getSize())
-                .as("Size of the saved net should match the request")
+                .as("net size shouldn't change")
                 .isEqualTo(databaseNet.getSize());
 
         assertThat(updatedNet.getState())
-                .as("State of the saved net should be REPORTED by default")
+                .as("should update net state.")
                 .isEqualTo(NetState.RECOVERY_PENDING);
     }
 
@@ -172,23 +172,23 @@ class NetServiceTest {
 
         Net updatedNet = netCaptor.getValue();
         assertThat(updatedNet.getNetId())
-                .as("Net id of the saved net should match the request")
+                .as("net id shouldn't change")
                 .isEqualTo(databaseNet.getNetId());
 
         assertThat(updatedNet.getLocationLat())
-                .as("Latitude of the saved net should match the request")
+                .as("net latitude shouldn't change")
                 .isEqualTo(databaseNet.getLocationLat());
 
         assertThat(updatedNet.getLocationLong())
-                .as("Longitude of the saved net should match the request")
+                .as("net longitude shouldn't change")
                 .isEqualTo(databaseNet.getLocationLong());
 
         assertThat(updatedNet.getSize())
-                .as("Size of the saved net should match the request")
+                .as("net size shouldn't change")
                 .isEqualTo(databaseNet.getSize());
 
         assertThat(updatedNet.getState())
-                .as("State of the saved net should be REPORTED by default")
+                .as("should update net state.")
                 .isEqualTo(NetState.RECOVERED);
     }
 
@@ -217,6 +217,75 @@ class NetServiceTest {
 
         // when / then
         assertThrows(IllegalNetStateChangeException.class, () -> netService.markRecovered(netId));
+
+        verify(netRepository).findByNetId(eq(netId));
+        verify(netRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = NetState.class, names = {"RECOVERY_PENDING", "REPORTED"})
+    void shouldUpdateRepository_whenNetStateIsValid_onMarkLost(NetState state) {
+        // given
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Net databaseNet = createDefaultNet(netId, state);
+
+        // when
+        when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
+        netService.markLost(netId);
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+
+        ArgumentCaptor<Net> netCaptor = ArgumentCaptor.forClass(Net.class);
+        verify(netRepository).save(netCaptor.capture());
+
+        Net updatedNet = netCaptor.getValue();
+        assertThat(updatedNet.getNetId())
+                .as("net id shouldn't change")
+                .isEqualTo(databaseNet.getNetId());
+
+        assertThat(updatedNet.getLocationLat())
+                .as("net latitude shouldn't change")
+                .isEqualTo(databaseNet.getLocationLat());
+
+        assertThat(updatedNet.getLocationLong())
+                .as("net longitude shouldn't change")
+                .isEqualTo(databaseNet.getLocationLong());
+
+        assertThat(updatedNet.getSize())
+                .as("net size shouldn't change")
+                .isEqualTo(databaseNet.getSize());
+
+        assertThat(updatedNet.getState())
+                .as("should update net state.")
+                .isEqualTo(NetState.LOST);
+    }
+
+    @Test
+    void shouldThrowNetNotFoundException_whenNoNetWithNetId_OnMarkLost() {
+        // given
+        Long netId = 0L;
+
+        //when
+        when(netRepository.findByNetId(any())).thenReturn(Optional.empty());
+        assertThrows(NetNotFoundException.class, () -> netService.markLost(netId));
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+        verify(netRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = NetState.class, names = {"LOST", "RECOVERED"})
+    void shouldThrowIllegalNetStateChange_whenInvalidState_onMarkLost(NetState state) {
+        // given
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Net databaseNet = createDefaultNet(netId, state);
+
+        when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
+
+        // when / then
+        assertThrows(IllegalNetStateChangeException.class, () -> netService.markLost(netId));
 
         verify(netRepository).findByNetId(eq(netId));
         verify(netRepository, never()).save(any());

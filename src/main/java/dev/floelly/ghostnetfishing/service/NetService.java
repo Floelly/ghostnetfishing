@@ -66,6 +66,11 @@ public class NetService implements INetService {
 
     @Override
     public void markLost(Long id) {
-
+        Net net = netRepository.findByNetId(id).orElseThrow(() -> new NetNotFoundException(id));
+        if(net.getState().equals(NetState.RECOVERED) || net.getState().equals(NetState.LOST)){
+            throw new IllegalNetStateChangeException(id, net.getState(), NetState.LOST);
+        }
+        net.setState(NetState.LOST);
+        netRepository.save(net);
     }
 }
