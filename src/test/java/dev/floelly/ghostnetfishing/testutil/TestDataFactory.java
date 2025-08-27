@@ -42,6 +42,12 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_NETS = "nets";
     public static final String STANDARD_ROLE = "STANDARD";
 
+    public static final String MARK_RECOVERED_FORM_QUERY = "form[method=post][action$=/mark-recovered]";
+    public static final String REQUEST_RECOVERY_FORM_QUERY = "form[method=post][action$=/request-recovery]";
+    public static final String SUBMIT_BUTTON_QUERY = "button[type=submit]";
+    public static final String NET_ID_TR_QUERY = "tr[data-net-id=%s]";
+    public static final String TABLE_ROWS_QUERY_SELECTOR = "main tbody tr";
+
     public static String formatDouble(double d) {
         return getDoubleFormat().format(d);
     }
