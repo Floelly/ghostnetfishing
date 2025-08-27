@@ -73,6 +73,15 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
         assertContainsSubmitButton(form, disabled);
     }
 
+    @ParameterizedTest
+    @MethodSource("markLostFormRowProvider")
+    void shouldRenderMarkLostButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+        Element form = row.selectFirst(MARK_LOST_FORM_QUERY);
+        assertNotNull(form);
+        assertThat(form.attr("action")).isEqualTo(formAction);
+        assertContainsSubmitButton(form, disabled);
+    }
+
     public Stream<Arguments> requestRecoveryFormRowProvider() {
         return Stream.of(
                 Arguments.of(reportedNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
@@ -87,6 +96,15 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
                 Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), false),
                 Arguments.of(recoveredNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
                 Arguments.of(lostNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
+        );
+    }
+
+    public Stream<Arguments> markLostFormRowProvider() {
+        return Stream.of(
+                Arguments.of(reportedNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
+                Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), false),
+                Arguments.of(recoveredNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
+                Arguments.of(lostNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
         );
     }
 

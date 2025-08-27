@@ -19,16 +19,12 @@ public final class TestDataFactory {
     public static final String WRONG_NET_SIZE = "XXS";
     public static final String NETS_NEW_ENDPOINT = "/nets/new";
     public static final String NETS_ENDPOINT = "/nets";
-    public static final String REQUEST_NET_RECOVERY_ENDPOINT = "/nets/%d/request-recovery";
-    public static final String MARK_NET_RECOVERED_ENDPOINT = "/nets/%d/mark-recovered";
     public static final String LOGIN_ENDPOINT = "/login";
     public static final String NEW_GHOST_NET_HEADLINE = "Report new ghost net";
     public static final String SUCCESSFULLY_REPORTED_NET_MESSAGE = "New net added successfully";
     public static final String LATITUDE = "Latitude";
     public static final String LONGITUDE = "Longitude";
     public static final String LAYOUT_HTML_TAG = "footer";
-    public static final String NEW_NET_FORM_QUERY_SELECTOR = "form[method=post][action='" + NETS_NEW_ENDPOINT + "']";
-    public static final String INVALID_FEEDBACK_QUERY_SELECTOR = ".invalid-feedback";
     public static final Map<String, String> EXPECTED_SIZE_OPTIONS = Map.of(
             "", "- Choose size -",
             "S", "S - (Diameter up to 10 m)",
@@ -40,13 +36,21 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_LONGITUDE = "location_long";
     public static final String DB_COLUMN_SIZE = "size";
     public static final String DB_COLUMN_NETS = "nets";
+
     public static final String STANDARD_ROLE = "STANDARD";
 
+    public static final String REQUEST_NET_RECOVERY_ENDPOINT = "/nets/%d/request-recovery";
+    public static final String MARK_NET_RECOVERED_ENDPOINT = "/nets/%d/mark-recovered";
+    public static final String MARK_NET_LOST_ENDPOINT = "/nets/%d/mark-lost";
+
+    public static final String NEW_NET_FORM_QUERY_SELECTOR = "form[method=post][action='" + NETS_NEW_ENDPOINT + "']";
+    public static final String INVALID_FEEDBACK_QUERY_SELECTOR = ".invalid-feedback";
     public static final String MARK_RECOVERED_FORM_QUERY = "form[method=post][action$=/mark-recovered]";
     public static final String REQUEST_RECOVERY_FORM_QUERY = "form[method=post][action$=/request-recovery]";
     public static final String SUBMIT_BUTTON_QUERY = "button[type=submit]";
     public static final String NET_ID_TR_QUERY = "tr[data-net-id=%s]";
     public static final String TABLE_ROWS_QUERY_SELECTOR = "main tbody tr";
+    public static final String MARK_LOST_FORM_QUERY = "form[method=post][action$=/mark-lost]";
 
     public static String formatDouble(double d) {
         return getDoubleFormat().format(d);
