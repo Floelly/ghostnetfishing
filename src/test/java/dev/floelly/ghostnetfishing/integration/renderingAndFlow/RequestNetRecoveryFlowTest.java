@@ -1,13 +1,12 @@
 package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
-import org.assertj.core.api.Assertions;
-import org.jsoup.Jsoup;
+import dev.floelly.ghostnetfishing.testutil.TestDataFactory;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -15,79 +14,37 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Objects;
-
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
-    public static final String RECOVERY_PENDING = "RECOVERY_PENDING";
-    public static final String REPORTED_NET_ID = "1001";
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
+    @ParameterizedTest(name = "net {0} should have status {1} after request net recovery")
+    @CsvSource({
+            TestDataFactory.REPORTED_ID + "," + RECOVERY_PENDING,
+            RECOVERY_PENDING_ID + "," + RECOVERY_PENDING,
+            LOST_ID + "," + LOST,
+            RECOVERED_ID + "," + RECOVERED
+    })
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
-    void shouldChangeStateInFrontEnd_whenSuccessful_onRequestNetRecovery() throws Exception {
-        //request recovery for net 1001 (see prepopulated table
-        MvcResult requestRecoveryResult = mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-        String redirectedUrlOnRequestRecovery = requestRecoveryResult.getResponse().getRedirectedUrl();
-        assertNotNull(redirectedUrlOnRequestRecovery);
-
-        //check recovered status on net
-        MvcResult finalResult = mockMvc.perform(get(redirectedUrlOnRequestRecovery))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-
-        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
-        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_NET_ID));
-        assertNotNull(row);
-        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", RECOVERY_PENDING, row.text())).contains(RECOVERY_PENDING);
+    void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
+        sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
+        Document doc = sendGetRequestToNetsPage(mockMvc);
+        assertExpectedNetState_forNetId_onNetsPage(doc, netId, expectedStatus);
     }
 
     @Test
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
     void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
-        String invalidNetId = "invalidNetId";
-        MvcResult requestRecoveryResult = mockMvc.perform(post("/nets/" + invalidNetId + "/request-recovery")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-        String redirectedUrlOnRequestRecovery = requestRecoveryResult.getResponse().getRedirectedUrl();
-        assertNotNull(redirectedUrlOnRequestRecovery);
+        MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, REQUEST_NET_RECOVERY_ENDPOINT.replace("%d", INVALID_NET_ID));
 
-        MockHttpSession session = (MockHttpSession) requestRecoveryResult.getRequest().getSession(false);
+        MockHttpSession session = getSession(requestRecoveryResult);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
 
-        Assertions.assertThat(session).isNotNull();
-
-        MvcResult getResult = mockMvc.perform(get(redirectedUrlOnRequestRecovery).session(session))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("toastMessages"))
-                .andReturn();
-        Document doc = Jsoup.parse(getResult.getResponse().getContentAsString());
-        Element toastContainer = doc.selectFirst(".toast-container");
-        Assertions.assertThat(toastContainer).isNotNull();
-        Elements toastMessages = toastContainer.select(".toast");
-
-        Assertions.assertThat(toastMessages).size().isEqualTo(1);
-
-        String toastHtml = Objects.requireNonNull(toastMessages.first()).toString();
-
-        Assertions.assertThat(toastHtml).contains(invalidNetId);
-        Assertions.assertThat(toastHtml).contains("parameter");
+        assertToastMessageExists(doc, INVALID_NET_ID, "parameter");
     }
 
     @Disabled("not Implemented jet")
