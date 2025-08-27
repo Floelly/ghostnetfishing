@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
+import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -63,9 +65,9 @@ public class PostNewNetFlowTest extends AbstractH2Test {
     // TODO: refactor!
     void shouldDisplayErrorInformation_whenGivenInvalidValues_OnPostNewNet() throws Exception {
         String content = mockMvc.perform(post(NETS_NEW_ENDPOINT)
-                        .param(LOCATION_LAT, WRONG_NET_LOCATION_LAT)
-                        .param(LOCATION_LONG, WRONG_NET_LOCATION_LONG)
-                        .param(SIZE, WRONG_NET_SIZE)
+                        .param(LOCATION_LAT, INVALID_NET_LOCATION_LAT)
+                        .param(LOCATION_LONG, INVALID_NET_LOCATION_LONG)
+                        .param(SIZE, INVALID_NET_SIZE)
                         .with(csrf()))
                 .andReturn()
                 .getResponse()

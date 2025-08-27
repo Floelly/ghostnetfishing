@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.NEW_NET_FORM_QUERY_SELECTOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

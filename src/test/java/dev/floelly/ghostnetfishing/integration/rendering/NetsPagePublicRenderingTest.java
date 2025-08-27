@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.stream.Stream;
 
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
+import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.sendGetRequestToNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

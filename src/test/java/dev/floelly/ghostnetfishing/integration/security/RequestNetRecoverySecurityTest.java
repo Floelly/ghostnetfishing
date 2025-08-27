@@ -34,7 +34,7 @@ public class RequestNetRecoverySecurityTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(username ="regular-user", roles = {STANDARD_ROLE})
+    @WithMockUser(username ="regular-user", roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldRedirect_whenUserHasRights_onRequestNetRecovery() throws Exception {
         mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))

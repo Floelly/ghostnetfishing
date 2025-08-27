@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.stream.Stream;
 
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +40,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
     @BeforeAll
     public void setUp() throws Exception {
         MvcResult result = mockMvc.perform(get(NETS_ENDPOINT)
-                        .with(user("user").roles(STANDARD_ROLE)))
+                        .with(user("user").roles(SPRING_SECURITY_STANDARD_ROLE)))
                 .andReturn();
         Document document = Jsoup.parse(result.getResponse().getContentAsString());
         Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);

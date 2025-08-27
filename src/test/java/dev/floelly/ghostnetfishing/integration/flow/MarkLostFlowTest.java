@@ -12,6 +12,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedNetState_forNetId_onNetsPage;
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertToastMessageExists;
+import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
 @Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)

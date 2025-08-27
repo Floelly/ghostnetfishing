@@ -33,7 +33,7 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(username ="regular-user", roles = {STANDARD_ROLE})
+    @WithMockUser(username ="regular-user", roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldRedirect_whenUserHasRights_onMarkNetRecovered() throws Exception {
         mockMvc.perform(post(String.format(MARK_NET_RECOVERED_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
