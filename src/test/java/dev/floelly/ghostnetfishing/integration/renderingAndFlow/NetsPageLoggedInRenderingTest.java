@@ -1,6 +1,7 @@
 package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -12,12 +13,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.stream.Stream;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
@@ -34,7 +38,10 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
 
     @BeforeAll
     public void setUp() throws Exception {
-        Document document = sendGetRequestToNetsPage(mockMvc);
+        MvcResult result = mockMvc.perform(get(NETS_ENDPOINT)
+                        .with(user("user").roles(STANDARD_ROLE)))
+                .andReturn();
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
         Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);
         reportedNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_NET_ID));
         recoveryPendingNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERY_PENDING_NET_ID));
