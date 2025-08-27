@@ -56,4 +56,9 @@ public class NetService implements INetService {
     public List<NetDTO> getAllByState(NetState state) {
         return getAll().stream().filter(net -> net.getState().equals(state)).collect(Collectors.toList());
     }
+
+    @Override
+    public void markRecovered(Long id) {
+
+    }
 }

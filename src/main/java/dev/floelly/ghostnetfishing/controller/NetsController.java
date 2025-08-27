@@ -84,4 +84,8 @@ public class NetsController {
         netService.requestRecovery(id);
         return "redirect:/nets";
     }
+
+    public String markRecovered(Long netId) {
+        return null;
+    }
 }

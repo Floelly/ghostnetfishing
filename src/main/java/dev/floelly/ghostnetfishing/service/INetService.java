@@ -14,4 +14,6 @@ public interface INetService {
     void requestRecovery(Long id);
 
     List<NetDTO> getAllByState(NetState state);
+
+    void markRecovered(Long id);
 }

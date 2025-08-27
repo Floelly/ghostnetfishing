@@ -20,6 +20,7 @@ public final class TestDataFactory {
     public static final String NETS_NEW_ENDPOINT = "/nets/new";
     public static final String NETS_ENDPOINT = "/nets";
     public static final String REQUEST_NET_RECOVERY_ENDPOINT = "/nets/%d/request-recovery";
+    public static final String MARK_NET_RECOVERED_ENDPOINT = "/nets/%d/mark-recovered";
     public static final String LOGIN_ENDPOINT = "/login";
     public static final String NEW_GHOST_NET_HEADLINE = "Report new ghost net";
     public static final String SUCCESSFULLY_REPORTED_NET_MESSAGE = "New net added successfully";
