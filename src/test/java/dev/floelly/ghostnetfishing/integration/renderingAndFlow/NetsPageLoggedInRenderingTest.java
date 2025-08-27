@@ -91,7 +91,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
     }
 
     private static void assertContainsSubmitButton(Element form, boolean disabled) {
-        Element button = form.selectFirst("button[type=submit]");
+        Element button = form.selectFirst(SUBMIT_BUTTON_QUERY);
         assertNotNull(button);
         assertThat(button.hasAttr("disabled")).isEqualTo(disabled);
     }
