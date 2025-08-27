@@ -6,12 +6,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.stream.Stream;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,15 +53,25 @@ public class NetsPagePublicRenderingTest extends AbstractH2Test {
         assertNotNull(lostNetRow);
     }
 
-    @Test
-    void shouldNotRenderRequestRecoveryButton_whenNotLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
+    @ParameterizedTest
+    @MethodSource("rowProvider")
+    void shouldNotRenderRequestRecoveryButton_whenNotLoggedIn_onNetsPage(Element row) {
+        Element form = row.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
         assertNull(form);
     }
 
-    @Test
-    void shouldNotRenderMarkRecoveredButton_whenNotLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst(MARK_RECOVERED_FORM_QUERY);
+    @ParameterizedTest
+    @MethodSource("rowProvider")
+    void shouldNotRenderMarkRecoveredButton_whenNotLoggedIn_onNetsPage(Element row) {
+        Element form = row.selectFirst(MARK_RECOVERED_FORM_QUERY);
         assertNull(form);
+    }
+    public Stream<Arguments> rowProvider() {
+        return Stream.of(
+                Arguments.of(reportedNetRow),
+                Arguments.of(recoveryPendingNetRow),
+                Arguments.of(recoveredNetRow),
+                Arguments.of(lostNetRow)
+        );
     }
 }

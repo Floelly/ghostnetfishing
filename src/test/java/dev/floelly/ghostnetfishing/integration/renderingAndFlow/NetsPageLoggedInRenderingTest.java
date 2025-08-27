@@ -6,12 +6,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.stream.Stream;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -51,28 +55,41 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
         assertNotNull(lostNetRow);
     }
 
-    @Test
-    void shouldRenderRequestRecoveryButtonWithCorrectPostMethod_whenLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
+    @ParameterizedTest
+    @MethodSource("requestRecoveryFormRowProvider")
+    void shouldRenderRequestRecoveryButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+        Element form = row.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
         assertNotNull(form);
-        assertThat(form.attr("action")).isEqualTo(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
-        assertContainsActiveButton(form);
+        assertThat(form.attr("action")).isEqualTo(formAction);
+        assertContainsSubmitButton(form, disabled);
     }
 
-    @Test
-    void shouldRenderMarkRecoveredButtonWithCorrectId_whenLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst(MARK_RECOVERED_FORM_QUERY);
+    @ParameterizedTest
+    @MethodSource("markRecoveredFormRowProvider")
+    void shouldRenderMarkRecoveredButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+        Element form = row.selectFirst(MARK_RECOVERED_FORM_QUERY);
         assertNotNull(form);
-        assertThat(form.attr("action")).isEqualTo(String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
-        assertContainsDisabledButton(form);
+        assertThat(form.attr("action")).isEqualTo(formAction);
+        assertContainsSubmitButton(form, disabled);
     }
 
-    private static void assertContainsActiveButton(Element form) {
-        assertContainsSubmitButton(form, false);
+    public Stream<Arguments> requestRecoveryFormRowProvider() {
+        return Stream.of(
+                Arguments.of(reportedNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
+                Arguments.of(recoveryPendingNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), true),
+                Arguments.of(recoveredNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
+                Arguments.of(lostNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
+        );
     }
-    private static void assertContainsDisabledButton(Element form) {
-        assertContainsSubmitButton(form, true);
+    public Stream<Arguments> markRecoveredFormRowProvider() {
+        return Stream.of(
+                Arguments.of(reportedNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), true),
+                Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), false),
+                Arguments.of(recoveredNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
+                Arguments.of(lostNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
+        );
     }
+
     private static void assertContainsSubmitButton(Element form, boolean disabled) {
         Element button = form.selectFirst("button[type=submit]");
         assertNotNull(button);
