@@ -2,14 +2,16 @@ package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
 import org.jsoup.nodes.Document;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
@@ -33,21 +35,33 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
         assertExpectedNetState_forNetId_onNetsPage(doc, netId, expectedStatus);
     }
 
-    @Disabled("not Implemented jet")
     @Test
-    void shouldShowToastError_whenWrongId_onRequestNetRecovery()  {
-        //TODO: implement. Feature already implemented
+    @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
+    void shouldShowToastError_whenWrongId_onMarkNetRecovered() throws Exception {
+        MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, MARK_NET_RECOVERED_ENDPOINT.replace("%d", INVALID_NET_ID));
+
+        MockHttpSession session = getSession(requestRecoveryResult);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+
+        assertToastMessageExists(doc, INVALID_NET_ID, "parameter");
     }
 
-    @Disabled("not Implemented jet")
     @Test
-    void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() {
-        //TODO: implement. Feature already implemented
+    @WithMockUser(roles = {STANDARD_ROLE})
+    void shouldShowToastError_WhenNetIdNotFound_onMarkNetRecovered() throws Exception {
+        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, 0));
+        MockHttpSession session = getSession(result);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+        assertToastMessageExists(doc, "0", "id", "not found");
     }
 
-    @Disabled("not Implemented jet")
-    @Test
-    void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery() {
-        //TODO: implement. Feature already implemented
+    @ParameterizedTest
+    @ValueSource(strings = {RECOVERED_NET_ID, LOST_NET_ID})
+    @WithMockUser(roles = {STANDARD_ROLE})
+    void shouldShowToastError_WhenIllegalNetStateChange_onMarkNetRecovered(String netId) throws Exception {
+        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(netId)));
+        MockHttpSession session = getSession(result);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+        assertToastMessageExists(doc, netId, "state");
     }
 }

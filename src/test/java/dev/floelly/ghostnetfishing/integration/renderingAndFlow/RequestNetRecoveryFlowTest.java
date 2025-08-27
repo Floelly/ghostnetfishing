@@ -3,10 +3,10 @@ package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
 import dev.floelly.ghostnetfishing.testutil.TestDataFactory;
 import org.jsoup.nodes.Document;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -47,15 +47,22 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
         assertToastMessageExists(doc, INVALID_NET_ID, "parameter");
     }
 
-    @Disabled("not Implemented jet")
     @Test
-    void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() {
-        //TODO: implement. functionality already implemented
+    @WithMockUser(roles = {STANDARD_ROLE})
+    void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() throws Exception {
+        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, 0));
+        MockHttpSession session = getSession(result);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+        assertToastMessageExists(doc, "0", "id", "not found");
     }
 
-    @Disabled("not Implemented jet")
-    @Test
-    void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery() {
-        //TODO: implement. functionality already implemented
+    @ParameterizedTest
+    @ValueSource(strings = {RECOVERED_NET_ID, LOST_NET_ID, RECOVERY_PENDING_NET_ID})
+    @WithMockUser(roles = {STANDARD_ROLE})
+    void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery(String netId) throws Exception {
+        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
+        MockHttpSession session = getSession(result);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+        assertToastMessageExists(doc, netId, "state");
     }
 }
