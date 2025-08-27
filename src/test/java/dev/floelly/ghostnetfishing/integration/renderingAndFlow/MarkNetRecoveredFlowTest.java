@@ -21,10 +21,10 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
 
     @ParameterizedTest(name = "net {0} should have status {1} after marking recovered")
     @CsvSource({
-            REPORTED_ID + "," + RECOVERED,
-            RECOVERY_PENDING_ID + "," + RECOVERED,
-            LOST_ID + "," + LOST,
-            RECOVERED_ID + "," + RECOVERED
+            REPORTED_NET_ID + "," + RECOVERED,
+            RECOVERY_PENDING_NET_ID + "," + RECOVERED,
+            LOST_NET_ID + "," + LOST,
+            RECOVERED_NET_ID + "," + RECOVERED
     })
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
     void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {

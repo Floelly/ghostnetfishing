@@ -24,10 +24,10 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
 
     @ParameterizedTest(name = "net {0} should have status {1} after request net recovery")
     @CsvSource({
-            TestDataFactory.REPORTED_ID + "," + RECOVERY_PENDING,
-            RECOVERY_PENDING_ID + "," + RECOVERY_PENDING,
-            LOST_ID + "," + LOST,
-            RECOVERED_ID + "," + RECOVERED
+            TestDataFactory.REPORTED_NET_ID + "," + RECOVERY_PENDING,
+            RECOVERY_PENDING_NET_ID + "," + RECOVERY_PENDING,
+            LOST_NET_ID + "," + LOST,
+            RECOVERED_NET_ID + "," + RECOVERED
     })
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
     void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {

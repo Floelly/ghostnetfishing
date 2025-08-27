@@ -26,10 +26,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class NetsPagePublicRenderingTest extends AbstractH2Test {
-    public static final String REPORTED_NET_ID = "1001";
-    public static final String RECOVERY_PENDING_NET_ID = "1004";
-    public static final String RECOVERED_NET_ID = "1003";
-    public static final String LOST_NET_ID = "1002";
     private Element reportedNetRow;
     private Element recoveryPendingNetRow;
     private Element recoveredNetRow;

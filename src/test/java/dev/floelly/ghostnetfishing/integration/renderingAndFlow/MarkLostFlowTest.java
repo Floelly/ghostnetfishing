@@ -20,10 +20,10 @@ public class MarkLostFlowTest extends AbstractH2Test {
 
     @ParameterizedTest(name = "net {0} should have status {1} after marking lost")
     @CsvSource({
-            REPORTED_ID + "," + LOST,
-            RECOVERY_PENDING_ID + "," + LOST,
-            LOST_ID + "," + LOST,
-            RECOVERED_ID + "," + RECOVERED
+            REPORTED_NET_ID + "," + LOST,
+            RECOVERY_PENDING_NET_ID + "," + LOST,
+            LOST_NET_ID + "," + LOST,
+            RECOVERED_NET_ID + "," + RECOVERED
     })
     void shouldUpdateState_onMarkNetLost(String netId, String expectedStatus) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(netId)));

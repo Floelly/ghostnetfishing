@@ -78,10 +78,10 @@ public final class TestDataFactory {
     public static final String RECOVERED = "RECOVERED";
     public static final String RECOVERY_PENDING = "RECOVERY_PENDING";
     public static final String REPORTED = "REPORTED";
-    public static final String REPORTED_ID = "1001";
-    public static final String LOST_ID = "1002";
-    public static final String RECOVERED_ID = "1003";
-    public static final String RECOVERY_PENDING_ID = "1004";
+    public static final String REPORTED_NET_ID = "1001";
+    public static final String LOST_NET_ID = "1002";
+    public static final String RECOVERED_NET_ID = "1003";
+    public static final String RECOVERY_PENDING_NET_ID = "1004";
     public static final String INVALID_NET_ID = "invalidNetId";
 
     public static String formatDouble(double d) {
