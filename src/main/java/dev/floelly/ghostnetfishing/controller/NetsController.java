@@ -85,8 +85,9 @@ public class NetsController {
         return "redirect:/nets";
     }
 
-    public String markRecovered(Long netId) {
-        netService.markRecovered(netId);
+    @PostMapping("/{id}/mark-recovered")
+    public String markRecovered(@PathVariable long id) {
+        netService.markRecovered(id);
         return "redirect:/nets";
     }
 }

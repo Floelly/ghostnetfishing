@@ -25,17 +25,16 @@
                     </select>
                 </form>
             </div>
-            <div>
+            <div class="table-responsive">
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <td>Id</td>
-                            <td>Latitude</td>
-                            <td>Longitude</td>
-                            <td>Size</td>
-                            <td>Status</td>
-                            <td></td>
-                            <td style="display: none"></td>
+                            <th>Id</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Size</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -46,14 +45,18 @@
                             <td th:text="${net.size}"></td>
                             <td th:text="${net.state}"></td>
                             <td>
-                                <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED'}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Mark for Recovery</button>
-                                </form>
-                            </td>
-                            <td style="display: none !important">
-                                <form th:action="@{/nets/{id}/call-lost(id=${net.id})}" method="post" th:if="${net.state.name() == 'REPORTED' || net.state.name() == 'RECOVERY_PENDING'}">
-                                    <button type="submit" class="btn btn-sm btn-primary">Mark as Lost</button>
-                                </form>
+                                <div class="d-flex gap-3">
+                                    <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post" sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
+                                        <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${!net.state.name().equals('REPORTED')}">Mark for Recovery</button>
+                                    </form>
+                                    <form th:action="@{/nets/{id}/mark-recovered(id=${net.id})}" method="post" sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
+                                        <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${!net.state.name().equals('RECOVERY_PENDING')}">Mark as Recovered</button>
+                                    </form>
+                                    <form th:action="@{/nets/{id}/mark-lost(id=${net.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${net.state.name().equals('LOST') || net.state.name().equals('RECOVERED')}">Mark as Lost</button>
+                                    </form>
+                                </div>
+
                             </td>
                         </tr>
                     </tbody>
