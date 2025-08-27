@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -24,8 +25,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     public static final String RECOVERY_PENDING = "RECOVERY_PENDING";
+    public static final String REPORTED_NET_ID = "1001";
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,37 +36,8 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     @Test
     @WithMockUser(username = "standard-user", roles = {STANDARD_ROLE})
     void shouldChangeStateInFrontEnd_whenSuccessful_onRequestNetRecovery() throws Exception {
-        //setup net
-        double lat = getRandomLatitude();
-        double lon = getRandomLongitude();
-        String randomLatitude = formatDouble(lat);
-        String randomLongitude = formatDouble(lon);
-        MvcResult createResult = mockMvc.perform(post(NETS_NEW_ENDPOINT)
-                        .param(LOCATION_LAT, randomLatitude)
-                        .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, "L")
-                        .with(csrf()))
-                .andReturn();
-        String redirectedUrl = createResult.getResponse().getRedirectedUrl();
-        assertNotNull(redirectedUrl, "redirectedUrl of reporting a new net should not be null");
-
-        //get net id
-        MvcResult redirectResult = mockMvc.perform(get(redirectedUrl))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document doc = Jsoup.parse(redirectResult.getResponse().getContentAsString());
-        Elements rows = doc.select("main tr");
-        Element matchingRow = rows.stream()
-                .filter(row -> row.select("td").text().contains(randomLatitude)
-                        && row.select("td").text().contains(randomLongitude))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("No Net found for lat/lon"));
-
-        String netId = matchingRow.attr("data-net-id");
-        assertThat(netId).as("No net Id attribute found on row with matching lon/lat").isNotEmpty();
-
-        //request recovery for net
-        MvcResult requestRecoveryResult = mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)))
+        //request recovery for net 1001 (see prepopulated table
+        MvcResult requestRecoveryResult = mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(NETS_ENDPOINT))
@@ -78,9 +52,9 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
         Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
         Elements finalRows = finalDoc.select("main tr");
         Element netRow = finalRows.stream()
-                .filter(row -> row.attr("data-net-id").equals(netId))
+                .filter(row -> row.attr("data-net-id").equals(REPORTED_NET_ID))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("No Net found for net Id: " + netId));
+                .orElseThrow(() -> new AssertionError("No Net found for net Id: " + REPORTED_NET_ID));
         String rowEntries = netRow.select("td").text();
         assertThat(rowEntries).as(String.format("Net status should be %s", RECOVERY_PENDING)).contains(RECOVERY_PENDING);
     }
