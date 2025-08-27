@@ -33,6 +33,7 @@ class NetsControllerTest {
     private static final String POST_NEW_NET_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
     private static final String REQUEST_RECOVERY_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
     private static final String MARK_RECOVERED_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    private static final String MARK_LOST_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
 
     private static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
     public static final NewNetRequest VALID_NEW_NET_REQUEST = new NewNetRequest(20.0, 20.0, NetSize.L);
@@ -145,5 +146,24 @@ class NetsControllerTest {
 
         verify(netService).markRecovered(eq(netId));
         assertEquals("redirect:" + MARK_RECOVERED_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", MARK_RECOVERED_REDIRECT_TEMPLATE));
+    }
+
+    @Test
+    void shouldThrowException_whenServiceThrowsException_onMarkNetLost() {
+        doThrow(new RuntimeException()).when(netService).markLost(any());
+
+        assertThrows(RuntimeException.class, () ->
+                netController.markLost(5L));
+    }
+
+    @Test
+    void shouldCallServiceAndReturnRedirect_onMarkNetLost () {
+        Long netId = UUID.randomUUID().getMostSignificantBits();
+        doNothing().when(netService).markLost(eq(netId));
+
+        String controllerResponse = netController.markLost(netId);
+
+        verify(netService).markLost(eq(netId));
+        assertEquals("redirect:" + MARK_LOST_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", MARK_LOST_REDIRECT_TEMPLATE));
     }
 }

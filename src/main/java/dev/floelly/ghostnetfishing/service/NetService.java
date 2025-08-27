@@ -63,4 +63,9 @@ public class NetService implements INetService {
         net.setState(NetState.RECOVERED);
         netRepository.save(net);
     }
+
+    @Override
+    public void markLost(Long id) {
+
+    }
 }

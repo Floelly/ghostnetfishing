@@ -90,4 +90,10 @@ public class NetsController {
         netService.markRecovered(id);
         return "redirect:/nets";
     }
+
+    @PostMapping("/{id}/mark-lost")
+    public String markLost(@PathVariable long id) {
+        netService.markLost(id);
+        return "redirect:/nets";
+    }
 }
