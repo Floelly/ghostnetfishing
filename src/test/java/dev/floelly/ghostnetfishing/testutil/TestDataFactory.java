@@ -83,6 +83,11 @@ public final class TestDataFactory {
     public static final String RECOVERED_NET_ID = "1003";
     public static final String RECOVERY_PENDING_NET_ID = "1004";
     public static final String INVALID_NET_ID = "invalidNetId";
+    public static final String NOT_EXISTING_NET_ID = "0";
+
+    public static final String[] INVALID_ID_TOAST_MESSAGE = {INVALID_NET_ID, "parameter"};
+    public static final String[] ID_NOT_FOUND_TOAST_MESSAGE = {NOT_EXISTING_NET_ID, "id", "not found"};
+    public static final String[] ILLEGAL_STATE_CHANGE_TOAST_MESSAGE = {"state"};
 
     private static String formatDouble(double d) {
         return getDoubleFormat().format(d);

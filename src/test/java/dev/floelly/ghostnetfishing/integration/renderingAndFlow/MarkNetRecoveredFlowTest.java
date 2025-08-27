@@ -43,16 +43,16 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
         MockHttpSession session = getSession(requestRecoveryResult);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
 
-        assertToastMessageExists(doc, INVALID_NET_ID, "parameter");
+        assertToastMessageExists(doc, INVALID_ID_TOAST_MESSAGE);
     }
 
     @Test
     @WithMockUser(roles = {STANDARD_ROLE})
     void shouldShowToastError_WhenNetIdNotFound_onMarkNetRecovered() throws Exception {
-        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, 0));
+        MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(NOT_EXISTING_NET_ID)));
         MockHttpSession session = getSession(result);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
-        assertToastMessageExists(doc, "0", "id", "not found");
+        assertToastMessageExists(doc, ID_NOT_FOUND_TOAST_MESSAGE);
     }
 
     @ParameterizedTest
@@ -62,6 +62,6 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(netId)));
         MockHttpSession session = getSession(result);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
-        assertToastMessageExists(doc, netId, "state");
+        assertToastMessageExists(doc, ILLEGAL_STATE_CHANGE_TOAST_MESSAGE);
     }
 }
