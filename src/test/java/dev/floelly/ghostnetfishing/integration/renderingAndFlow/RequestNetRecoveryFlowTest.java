@@ -50,13 +50,11 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
                 .andExpect(status().isOk())
                 .andReturn();
         Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-        Elements finalRows = finalDoc.select("main tr");
-        Element netRow = finalRows.stream()
-                .filter(row -> row.attr("data-net-id").equals(REPORTED_NET_ID))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("No Net found for net Id: " + REPORTED_NET_ID));
-        String rowEntries = netRow.select("td").text();
-        assertThat(rowEntries).as(String.format("Net status should be %s", RECOVERY_PENDING)).contains(RECOVERY_PENDING);
+
+        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
+        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_NET_ID));
+        assertNotNull(row);
+        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", RECOVERY_PENDING, row.text())).contains(RECOVERY_PENDING);
     }
 
     @Test
