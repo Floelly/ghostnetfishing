@@ -31,7 +31,7 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
             LOST_NET_ID + "," + LOST,
             RECOVERED_NET_ID + "," + RECOVERED
     })
-    @WithMockUser(username = "standard-user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser( roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
@@ -39,7 +39,7 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(username = "standard-user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
         MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, REQUEST_NET_RECOVERY_ENDPOINT.replace("%d", INVALID_NET_ID));
 

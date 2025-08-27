@@ -17,7 +17,7 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(username ="no-right-user", roles = {})
+    @WithMockUser(roles = {})
     void shouldDenyAccess_whenUserLacksRights_onMarkNetRecovered() throws Exception {
         mockMvc.perform(post(String.format(MARK_NET_RECOVERED_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
@@ -33,7 +33,7 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(username ="regular-user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldRedirect_whenUserHasRights_onMarkNetRecovered() throws Exception {
         mockMvc.perform(post(String.format(MARK_NET_RECOVERED_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
