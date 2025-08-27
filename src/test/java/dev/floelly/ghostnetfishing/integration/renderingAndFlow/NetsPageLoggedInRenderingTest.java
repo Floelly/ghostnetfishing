@@ -40,11 +40,11 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
                         .with(user("user").roles(STANDARD_ROLE)))
                 .andReturn();
         Document document = Jsoup.parse(result.getResponse().getContentAsString());
-        Elements rows = document.select("main tbody tr");
-        reportedNetRow = rows.selectFirst("tr[data-net-id="+REPORTED_NET_ID+"]");
-        recoveryPendingNetRow = rows.selectFirst("tr[data-net-id="+RECOVERY_PENDING_NET_ID+"]");
-        recoveredNetRow = rows.selectFirst("tr[data-net-id="+RECOVERED_NET_ID+"]");
-        lostNetRow = rows.selectFirst("tr[data-net-id="+LOST_NET_ID+"]");
+        Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);
+        reportedNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_NET_ID));
+        recoveryPendingNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERY_PENDING_NET_ID));
+        recoveredNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERED_NET_ID));
+        lostNetRow = rows.selectFirst(String.format(NET_ID_TR_QUERY, LOST_NET_ID));
         assertNotNull(reportedNetRow);
         assertNotNull(recoveryPendingNetRow);
         assertNotNull(recoveredNetRow);
@@ -53,7 +53,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
 
     @Test
     void shouldRenderRequestRecoveryButtonWithCorrectPostMethod_whenLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst("form[method=post][action$=/request-recovery]");
+        Element form = reportedNetRow.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
         assertNotNull(form);
         assertThat(form.attr("action")).isEqualTo(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
         assertContainsActiveButton(form);
@@ -61,7 +61,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
 
     @Test
     void shouldRenderMarkRecoveredButtonWithCorrectId_whenLoggedIn_onNetsPage() throws Exception {
-        Element form = reportedNetRow.selectFirst("form[method=post][action$=/mark-recovered]");
+        Element form = reportedNetRow.selectFirst(MARK_RECOVERED_FORM_QUERY);
         assertNotNull(form);
         assertThat(form.attr("action")).isEqualTo(String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
         assertContainsDisabledButton(form);
