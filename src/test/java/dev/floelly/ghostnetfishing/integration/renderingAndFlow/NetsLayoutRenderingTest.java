@@ -30,7 +30,7 @@ public class NetsLayoutRenderingTest extends AbstractH2Test {
         Document document = Jsoup.parse(result.getResponse().getContentAsString());
         Element matchingRow = document.select("main tbody tr[data-net-id=" + REPORTED_NET_ID + "]").stream()
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("No Net found for lat/lon"));
+                .orElseThrow(() -> new AssertionError("No Net found for given id: " + REPORTED_NET_ID + ". Check if there are any Nets in the database with that id."));
 
         String id = matchingRow.attr("data-net-id");
         assertThat(id).isNotEmpty();
@@ -38,6 +38,27 @@ public class NetsLayoutRenderingTest extends AbstractH2Test {
         Element form = matchingRow.selectFirst("form[method=post][action$=/request-recovery]");
         assertNotNull(form);
         assertThat(form.attr("action")).isEqualTo(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(id)));
+
+        Element button = form.selectFirst("button[type=submit]");
+        assertNotNull(button);
+    }
+
+    @Test
+    @WithMockUser(roles = {STANDARD_ROLE})
+    void shouldRenderMarkRecoveredButtonWithCorrectId_whenLoggedIn_onNetsPage() throws Exception {
+        MvcResult result = mockMvc.perform(get(NETS_ENDPOINT))
+                .andReturn();
+        Document document = Jsoup.parse(result.getResponse().getContentAsString());
+        Element matchingRow = document.select("main tbody tr[data-net-id=" + REPORTED_NET_ID + "]").stream()
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No Net found for given id: " + REPORTED_NET_ID + ". Check if there are any Nets in the database with that id."));
+
+        String id = matchingRow.attr("data-net-id");
+        assertThat(id).isNotEmpty();
+
+        Element form = matchingRow.selectFirst("form[method=post][action$=/mark-recovered]");
+        assertNotNull(form);
+        assertThat(form.attr("action")).isEqualTo(String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(id)));
 
         Element button = form.selectFirst("button[type=submit]");
         assertNotNull(button);
