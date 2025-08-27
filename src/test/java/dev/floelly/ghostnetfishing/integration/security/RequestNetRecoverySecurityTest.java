@@ -13,21 +13,21 @@ import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class RequestNetRecoverySecurityTest extends AbstractH2Test {
-    private static final Long NET_ID = 0L;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     @WithMockUser(username ="no-right-user", roles = {})
     void shouldDenyAccess_whenUserLacksRights_onRequestNetRecovery() throws Exception {
-        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, NET_ID))
+        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldRedirectToLogin_whenAnonymousUser_onRequestNetRecovery() throws Exception {
-        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, NET_ID))
+        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**"+LOGIN_ENDPOINT));
@@ -36,7 +36,7 @@ public class RequestNetRecoverySecurityTest extends AbstractH2Test {
     @Test
     @WithMockUser(username ="regular-user", roles = {STANDARD_ROLE})
     void shouldRedirect_whenUserHasRights_onRequestNetRecovery() throws Exception {
-        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, NET_ID))
+        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(NETS_ENDPOINT));

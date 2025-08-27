@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,29 +30,24 @@ public class PostNewNetFlowTest extends AbstractH2Test {
     private MockMvc mockMvc;
 
     @Test
+        // TODO: refactor!
     void shouldSaveGhostNetAndRedirectToOverview_OnPostNewNet() throws Exception {
-        double lat = getRandomLatitude();
-        double lon = getRandomLongitude();
-        String randomLatitude = formatDouble(lat);
-        String randomLongitude = formatDouble(lon);
+        String randomLatitude = getRandomLatitude();
+        String randomLongitude = getRandomLongitude();
+        String randomSize = getRandomNetSize();
 
-        mockMvc.perform(post(NETS_NEW_ENDPOINT)
-                        .param(LOCATION_LAT, randomLatitude)
-                        .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, "L")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT));
+        assertPostNewNetSuccessful(mockMvc, randomLatitude, randomLongitude, randomSize);
 
         mockMvc.perform(get(NETS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString(randomLatitude)))
                 .andExpect(content().string(containsString(randomLongitude)))
-                .andExpect(content().string(containsString("L")))
-                .andExpect(content().string(containsString("REPORTED")));
+                .andExpect(content().string(containsString(randomSize)))
+                .andExpect(content().string(containsString(REPORTED)));
     }
 
     @Test
+        // TODO: refactor!
     void shouldFailValidationAndStayOnForm_whenGivenInvalidValues_OnPostNewNet() throws Exception {
         mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, EMPTY_STRING)
@@ -66,6 +60,7 @@ public class PostNewNetFlowTest extends AbstractH2Test {
     }
 
     @Test
+    // TODO: refactor!
     void shouldDisplayErrorInformation_whenGivenInvalidValues_OnPostNewNet() throws Exception {
         String content = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, WRONG_NET_LOCATION_LAT)
@@ -87,38 +82,11 @@ public class PostNewNetFlowTest extends AbstractH2Test {
 
     @Test
     void shouldDisplaySuccessInfoToastMessage_onPostNewNet() throws Exception {
-        double lat = getRandomLatitude();
-        double lon = getRandomLongitude();
-        String randomLatitude = formatDouble(lat);
-        String randomLongitude = formatDouble(lon);
+        MvcResult postResult = assertPostNewNetSuccessful(mockMvc, getRandomLatitude(), getRandomLongitude(), getRandomNetSize());
 
-        MvcResult postResult = mockMvc.perform(post(NETS_NEW_ENDPOINT)
-                        .param(LOCATION_LAT, randomLatitude)
-                        .param(LOCATION_LONG, randomLongitude)
-                        .param(SIZE, "L")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andExpect(flash().attributeExists("toastMessages"))
-                .andReturn();
+        MockHttpSession session = getSession(postResult);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
 
-        MockHttpSession session = (MockHttpSession) postResult.getRequest().getSession(false);
-
-        assertThat(session).isNotNull();
-
-        MvcResult getResult = mockMvc.perform(get(NETS_ENDPOINT).session(session))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("toastMessages"))
-                .andReturn();
-        Document doc = Jsoup.parse(getResult.getResponse().getContentAsString());
-        Element toastContainer = doc.selectFirst(".toast-container");
-        assertThat(toastContainer).isNotNull();
-        Elements toastMessages = toastContainer.select(".toast");
-
-        assertThat(toastMessages).size().isEqualTo(1);
-
-        String toastHtml = Objects.requireNonNull(toastMessages.first()).toString();
-
-        assertThat(toastHtml).contains(SUCCESSFULLY_REPORTED_NET_MESSAGE);
+        assertToastMessageExists(doc, SUCCESSFULLY_REPORTED_NET_MESSAGE);
     }
 }

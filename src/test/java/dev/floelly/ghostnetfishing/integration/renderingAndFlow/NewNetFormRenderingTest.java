@@ -31,6 +31,7 @@ public class NewNetFormRenderingTest extends AbstractH2Test {
     }
 
     @Test
+    // TODO: refactor
     void shouldDisplayGhostNetFormWithCorrectFieldsAndButton_OnGetNewNetForm() throws Exception {
         MvcResult result = mockMvc.perform(get(NETS_NEW_ENDPOINT))
                 .andExpect(status().isOk())
@@ -61,6 +62,7 @@ public class NewNetFormRenderingTest extends AbstractH2Test {
     }
 
     @Test
+        // TODO: refactor
     void shouldDisplayCorrectSelectNode_OnGetNewNetForm() throws Exception {
         String content = mockMvc.perform(get(NETS_NEW_ENDPOINT))
                 .andReturn()
@@ -86,6 +88,7 @@ public class NewNetFormRenderingTest extends AbstractH2Test {
     }
 
     @Test
+        // TODO: refactor
     void shouldDisplayCorrectInputNodes_OnGetNewNetForm() throws Exception {
         String content = mockMvc.perform(get(NETS_NEW_ENDPOINT))
                 .andReturn()

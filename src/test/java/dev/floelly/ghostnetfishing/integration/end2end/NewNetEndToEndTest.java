@@ -29,12 +29,11 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
     }
 
     @Test
+    //TODO: Refactor!
     void persistsNewNet_onPostNewNet() throws Exception {
-        double lat = getRandomLatitude();
-        double lon = getRandomLongitude();
-        String randomLatitude = formatDouble(lat);
-        String randomLongitude = formatDouble(lon);
-        String size = "L";
+        String randomLatitude = getRandomLatitude();
+        String randomLongitude = getRandomLongitude();
+        String size = getRandomNetSize();
 
         int responseStatus = mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
@@ -63,8 +62,8 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
             double dbLong = rs.getDouble(DB_COLUMN_LONGITUDE);
             String dbSize = rs.getString(DB_COLUMN_SIZE);
 
-            assertEquals(lat, dbLat, 0.0001, "Latitude of first persisted net does not match input value");
-            assertEquals(lon, dbLong, 0.0001, "Longitude of first persisted net does not match input value");
+            assertEquals(Long.parseLong(randomLatitude), dbLat, 0.0001, "Latitude of first persisted net does not match input value");
+            assertEquals(Long.parseLong(randomLongitude), dbLong, 0.0001, "Longitude of first persisted net does not match input value");
             assertEquals(size, dbSize, "Size of first persisted net does not match input value");
             assertFalse(rs.next(), "Should not have more than one persisted net");
         }

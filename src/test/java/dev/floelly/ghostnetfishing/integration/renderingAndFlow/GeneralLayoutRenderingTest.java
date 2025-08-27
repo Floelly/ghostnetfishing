@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
+//TODO: More tests for Layout and Accessibility
 public class GeneralLayoutRenderingTest extends AbstractH2Test {
 
     @Autowired
@@ -37,7 +38,7 @@ public class GeneralLayoutRenderingTest extends AbstractH2Test {
     }
 
     @Test
-    void shouldNotDisplayAnyToastMessage_onNetsPage() throws Exception {
+    void shouldNotDisplayAnyToastMessageByDefault_onNetsPage() throws Exception {
         MvcResult result = mockMvc.perform(get(NETS_ENDPOINT))
                 .andExpect(status().isOk())
                 .andReturn();

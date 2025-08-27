@@ -84,23 +84,33 @@ public final class TestDataFactory {
     public static final String RECOVERY_PENDING_NET_ID = "1004";
     public static final String INVALID_NET_ID = "invalidNetId";
 
-    public static String formatDouble(double d) {
+    private static String formatDouble(double d) {
         return getDoubleFormat().format(d);
     }
 
-    public static DecimalFormat getDoubleFormat() {
+    private static DecimalFormat getDoubleFormat() {
         DecimalFormat df = new DecimalFormat("#.####");
         df.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
         df.setDecimalSeparatorAlwaysShown(false);
         return df;
     }
 
-    public static double getRandomLongitude() {
-        return ThreadLocalRandom.current().nextDouble(-180, 180);
+    public static String getRandomLongitude() {
+        double d = ThreadLocalRandom.current().nextDouble(-180, 180);
+        return formatDouble(d);
     }
 
-    public static double getRandomLatitude() {
-        return ThreadLocalRandom.current().nextDouble(-90, 90);
+    public static String getRandomLatitude() {
+        double d = ThreadLocalRandom.current().nextDouble(-90, 90);
+        return formatDouble(d);
+    }
+
+    public static String getRandomNetSize() {
+        return EXPECTED_SIZE_OPTIONS.keySet().stream().filter(s -> !s.isEmpty()).iterator().next();
+    }
+
+    public static long getRandomNetId() {
+        return ThreadLocalRandom.current().nextLong();
     }
 
     public static MvcResult sendPostRequestAndExpectRedirectToNetsPage(MockMvc mockMvc, String url) throws Exception {
@@ -148,5 +158,22 @@ public final class TestDataFactory {
         for (String expectedString : expectedStrings) {
             AssertionsForInterfaceTypes.assertThat(toastMessageStrings).anySatisfy(s -> assertThat(s).contains(expectedString));
         }
+    }
+
+    public static @NotNull MvcResult assertPostNewNetSuccessful(MockMvc mockMvc, String randomLatitude, String randomLongitude, String randomSize) throws Exception {
+        return mockMvc.perform(post(NETS_NEW_ENDPOINT)
+                        .param(LOCATION_LAT, randomLatitude)
+                        .param(LOCATION_LONG, randomLongitude)
+                        .param(SIZE, randomSize)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(NETS_ENDPOINT))
+                .andReturn();
+    }
+
+    public static void assertContainsSubmitButton(Element form, boolean disabled) {
+        Element button = form.selectFirst(SUBMIT_BUTTON_QUERY);
+        assertNotNull(button);
+        assertThat(button.hasAttr("disabled")).isEqualTo(disabled);
     }
 }
