@@ -7,6 +7,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,87 +37,18 @@ public class MarkLostFlowTest extends AbstractH2Test {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void shouldChangeStateInFrontEnd_whenStateRecoveryPending_onMarkNetLost() throws Exception {
-        // try state change from reported to lost
-        mockMvc.perform(post(String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERY_PENDING_ID)))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-
-        //check recovered status on net
-        MvcResult finalResult = mockMvc.perform(get(NETS_ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
-        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERY_PENDING_ID));
-        assertNotNull(row);
-        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", LOST, row.text())).contains(LOST);
+    @ParameterizedTest(name = "net {0} should have status {1} after marking lost")
+    @CsvSource({
+            REPORTED_ID + "," + LOST,
+            RECOVERY_PENDING_ID + "," + LOST,
+            LOST_ID + "," + LOST,
+            RECOVERED_ID + "," + RECOVERED
+    })
+    void shouldUpdateState_onMarkNetLost(String netId, String expectedStatus) throws Exception {
+        sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(netId)));
+        Document doc = sendGetRequestToNetsPage(mockMvc);
+        assertExpectedNetState_forNetId_onNetsPage(doc, netId, expectedStatus);
     }
-
-    @Test
-    void shouldChangeStateInFrontEnd_whenStateReported_onMarkNetLost() throws Exception {
-        // try state change from reported to lost
-        mockMvc.perform(post(String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(REPORTED_ID)))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-
-        //check recovered status on net
-        MvcResult finalResult = mockMvc.perform(get(NETS_ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
-        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, REPORTED_ID));
-        assertNotNull(row);
-        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", LOST, row.text())).contains(LOST);
-    }
-
-    @Test
-    void shouldNotChangeStateInFrontEnd_whenStateLost_onMarkNetLost() throws Exception {
-        // try state change from reported to lost
-        mockMvc.perform(post(String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(LOST_ID)))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-
-        //check recovered status on net
-        MvcResult finalResult = mockMvc.perform(get(NETS_ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
-        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, LOST_ID));
-        assertNotNull(row);
-        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", LOST, row.text())).contains(LOST);
-    }
-
-    @Test
-    void shouldNotChangeStateInFrontEnd_whenStateRecovered_onMarkNetLost() throws Exception {
-        // try state change from reported to lost
-        mockMvc.perform(post(String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERED_ID)))
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(NETS_ENDPOINT))
-                .andReturn();
-
-        //check recovered status on net
-        MvcResult finalResult = mockMvc.perform(get(NETS_ENDPOINT))
-                .andExpect(status().isOk())
-                .andReturn();
-        Document finalDoc = Jsoup.parse(finalResult.getResponse().getContentAsString());
-        Elements rows = finalDoc.select(TABLE_ROWS_QUERY_SELECTOR);
-        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERED_ID));
-        assertNotNull(row);
-        assertThat(row.text()).as(String.format("Cannot find net status '%s' in table row. Given: '%s", RECOVERED, row.text())).contains(RECOVERED);
-    }
-
-
 
     @Disabled("not Implemented jet")
     @Test
@@ -133,5 +66,28 @@ public class MarkLostFlowTest extends AbstractH2Test {
     @Test
     void shouldShowToastError_WhenIllegalNetStateChange_onMarkNetLost() {
         //TODO: implement. functionality already implemented
+    }
+
+    private static void sendPostRequestAndExpectRedirectToNetsPage(MockMvc mockMvc, String url) throws Exception {
+        mockMvc.perform(post(url)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(NETS_ENDPOINT));
+    }
+
+    private static Document sendGetRequestToNetsPage(MockMvc mockMvc) throws Exception {
+        MvcResult finalResult = mockMvc.perform(get(NETS_ENDPOINT))
+                .andExpect(status().isOk())
+                .andReturn();
+        return Jsoup.parse(finalResult.getResponse().getContentAsString());
+    }
+
+    private static void assertExpectedNetState_forNetId_onNetsPage(Document doc, String netId, String expectedState)  {
+        Elements rows = doc.select(TABLE_ROWS_QUERY_SELECTOR);
+        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, netId));
+        assertNotNull(row);
+        assertThat(row.text())
+                .as(String.format("Cannot find net status '%s' in table row. Given: '%s", expectedState, row.text()))
+                .contains(expectedState);
     }
 }
