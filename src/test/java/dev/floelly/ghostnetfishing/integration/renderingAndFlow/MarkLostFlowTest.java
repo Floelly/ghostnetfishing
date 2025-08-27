@@ -119,7 +119,7 @@ public class MarkLostFlowTest extends AbstractH2Test {
 
     @Disabled("not Implemented jet")
     @Test
-    void shouldShowToastError_whenWrongId_onMarkNetLost() throws Exception {
+    void shouldShowToastError_whenWrongId_onMarkNetLost() {
         //TODO: implement. functionality already implemented
     }
 

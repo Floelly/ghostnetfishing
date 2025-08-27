@@ -1,7 +1,6 @@
 package dev.floelly.ghostnetfishing.integration.renderingAndFlow;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
-import org.assertj.core.api.Assertions;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -9,13 +8,10 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.Objects;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -59,7 +55,7 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
 
     @Disabled("not Implemented jet")
     @Test
-    void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
+    void shouldShowToastError_whenWrongId_onRequestNetRecovery()  {
 
     }
 

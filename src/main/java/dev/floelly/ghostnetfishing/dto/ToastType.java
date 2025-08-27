@@ -5,5 +5,5 @@ public enum ToastType {
     ERROR,
     SUCCESS,
     WARNING,
-    INFO;
+    INFO
 }
