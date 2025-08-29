@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.sendGetRequestToNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -64,12 +63,10 @@ public class NetsPagePublicRenderingTest extends AbstractH2Test {
     }
 
     @ParameterizedTest
-    @MethodSource("markLostFormRowProvider")
-    void shouldRenderMarkLostButtonWithCorrectPostAction_whenNotLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+    @MethodSource("rowProvider")
+    void shouldNotRenderMarkLostButton_whenNotLoggedIn_onNetsPage(Element row) {
         Element form = row.selectFirst(MARK_LOST_FORM_QUERY);
-        assertNotNull(form);
-        assertThat(form.attr("action")).isEqualTo(formAction);
-        assertContainsSubmitButton(form, disabled);
+        assertNull(form);
     }
 
     public Stream<Arguments> rowProvider() {
@@ -78,15 +75,6 @@ public class NetsPagePublicRenderingTest extends AbstractH2Test {
                 Arguments.of(recoveryPendingNetRow),
                 Arguments.of(recoveredNetRow),
                 Arguments.of(lostNetRow)
-        );
-    }
-
-    public Stream<Arguments> markLostFormRowProvider() {
-        return Stream.of(
-                Arguments.of(reportedNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
-                Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), false),
-                Arguments.of(recoveredNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
-                Arguments.of(lostNetRow, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
         );
     }
 }
