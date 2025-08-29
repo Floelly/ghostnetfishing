@@ -29,7 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/logout").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/", "/nets", "/nets/new").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/nets/new", "/nets/{id}/mark-lost").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/nets/new").permitAll()
                         .requestMatchers(HttpMethod.POST, "/nets/{id}/*").hasRole(Role.STANDARD.name())
                         .anyRequest().authenticated()
                 )
