@@ -11,7 +11,7 @@ import java.util.List;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-public class FrontEndTestFunctions {
+public final class FrontEndTestFunctions {
 
     public static final String NEW_NET_FORM_QUERY_SELECTOR = "form[method=post][action='" + NETS_NEW_ENDPOINT + "']";
     public static final String INVALID_FEEDBACK_QUERY_SELECTOR = ".invalid-feedback";

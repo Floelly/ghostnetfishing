@@ -16,7 +16,7 @@ import java.util.Objects;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-public class MvcTestFunctions {
+public final class MvcTestFunctions {
     public static MvcResult sendPostRequestAndExpectRedirectToNetsPage(MockMvc mockMvc, String url) throws Exception {
         return mockMvc.perform(MockMvcRequestBuilders.post(url)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
