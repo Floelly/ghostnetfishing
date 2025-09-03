@@ -46,15 +46,16 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
 
         assertThat(responseStatus).isLessThan(400);
 
-        try (Connection conn = DriverManager.getConnection(
-                MYSQL_CONTAINER.getJdbcUrl(), MYSQL_CONTAINER.getUsername(), MYSQL_CONTAINER.getPassword());
-            PreparedStatement ps = conn.prepareStatement(
+        try (Connection conn = getTestContainerConnection();
+             PreparedStatement ps = conn.prepareStatement(
                     String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC",
                             DB_COLUMN_LATITUDE,
                             DB_COLUMN_LONGITUDE,
                             DB_COLUMN_SIZE,
                             DB_COLUMN_NETS));
-            ResultSet rs = ps.executeQuery()) {
+             ResultSet rs = ps.executeQuery()
+
+        ) {
 
             assertTrue(rs.next(), "Should persist at least one net in database");
 

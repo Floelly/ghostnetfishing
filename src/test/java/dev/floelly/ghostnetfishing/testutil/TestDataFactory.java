@@ -48,6 +48,7 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_SIZE = "size";
     public static final String DB_COLUMN_NETS = "nets";
     public static final String SPRING_SECURITY_STANDARD_ROLE = "STANDARD";
+    public static final String SPRING_SECURITY_RECOVERER_ROLE = "RECOVERER";
 
     //sql data
     public static final String REPORTED_NET_ID = "1001";

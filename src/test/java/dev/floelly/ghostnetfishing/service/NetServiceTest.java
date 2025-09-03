@@ -64,8 +64,8 @@ class NetServiceTest {
 
     @Test
     void shouldReturnAllSavedNetDTOs_onGetAll() {
-        Net net1 = new Net( null, 123L,1.0, 2.0, NetSize.L, NetState.REPORTED);
-        Net net2 = new Net(null, 456L, 3.0, 4.0, NetSize.M, NetState.RECOVERY_PENDING);
+        Net net1 = new Net( null, 123L,1.0, 2.0, NetSize.L, NetState.REPORTED, null);
+        Net net2 = new Net(null, 456L, 3.0, 4.0, NetSize.M, NetState.RECOVERY_PENDING, null);
         when(netRepository.findAll()).thenReturn(List.of(net1, net2));
 
         List<NetDTO> result = netService.getAll();
@@ -292,6 +292,6 @@ class NetServiceTest {
     }
 
     private static @NotNull Net createDefaultNet(Long netId, NetState netState) {
-        return new Net(null, netId, 1.0, 2.0, NetSize.L, netState);
+        return new Net(null, netId, 1.0, 2.0, NetSize.L, netState, null);
     }
 }

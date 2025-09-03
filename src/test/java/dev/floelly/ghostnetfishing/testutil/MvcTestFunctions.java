@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.shaded.org.checkerframework.checker.nullness.qual.Nullable;
@@ -18,11 +19,15 @@ import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
 public final class MvcTestFunctions {
     public static MvcResult sendPostRequestAndExpectRedirectToNetsPage(MockMvc mockMvc, String url) throws Exception {
-        return mockMvc.perform(MockMvcRequestBuilders.post(url)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
-                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+        return sendPostRequestAndExpectRedirect(mockMvc, url)
                 .andExpect(MockMvcResultMatchers.redirectedUrl(NETS_ENDPOINT))
                 .andReturn();
+    }
+
+    public static ResultActions sendPostRequestAndExpectRedirect(MockMvc mockMvc, String url) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.post(url)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
     }
 
     public static Document sendGetRequestToNetsPage(MockMvc mockMvc) throws Exception {

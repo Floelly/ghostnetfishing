@@ -12,10 +12,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 @ActiveProfiles("mysql-container-test")
 @SpringBootTest
@@ -43,6 +40,11 @@ public abstract class AbstractMySQLContainerTest {
         registry.add("spring.datasource.password", MYSQL_CONTAINER::getPassword);
     }
 
+    protected static Connection getTestContainerConnection() throws SQLException {
+        return DriverManager.getConnection(
+                MYSQL_CONTAINER.getJdbcUrl(), MYSQL_CONTAINER.getUsername(), MYSQL_CONTAINER.getPassword()
+        );
+    }
 
     @BeforeEach
     void cleanDatabase() throws SQLException {
