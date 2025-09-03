@@ -17,7 +17,7 @@ public class Net {
     private Long id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private Long netId;
+    private Long netId = UUID.randomUUID().getMostSignificantBits();
 
     @Column(nullable = false)
     private Double locationLat;
@@ -33,6 +33,10 @@ public class Net {
     @Column(nullable = false)
     private NetState state;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public Net(Double locationLat, Double locationLong, NetSize size, NetState state) {
         this.locationLat = locationLat;
         this.locationLong = locationLong;
@@ -42,12 +46,5 @@ public class Net {
 
     public Net(Double locationLat, Double locationLong, NetSize size) {
         this(locationLat, locationLong, size, NetState.REPORTED);
-    }
-
-    @PrePersist
-    private void ensureNetId() {
-        if (this.netId == null) {
-            this.netId = UUID.randomUUID().getMostSignificantBits();
-        }
     }
 }
