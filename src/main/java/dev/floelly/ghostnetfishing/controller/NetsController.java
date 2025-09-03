@@ -74,26 +74,33 @@ public class NetsController {
             return "/nets/new";
         }
         netService.addNewNet(newNetRequest);
-        List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse("New net added successfully", ToastType.SUCCESS));
-        redirectAttributes.addFlashAttribute("toastMessages", toastMessages);
+        addSuccessMessage(redirectAttributes, "New net added successfully");
         return "redirect:/nets";
     }
 
     @PostMapping("/{id}/request-recovery")
-    public String requestNetRecovery(@PathVariable long id) {
+    public String requestNetRecovery(@PathVariable long id, RedirectAttributes redirectAttributes) {
         netService.requestRecovery(id);
+        addSuccessMessage(redirectAttributes, "Request recovery requested successfully for net " + id);
         return "redirect:/nets";
     }
 
     @PostMapping("/{id}/mark-recovered")
-    public String markRecovered(@PathVariable long id) {
+    public String markRecovered(@PathVariable long id, RedirectAttributes redirectAttributes) {
         netService.markRecovered(id);
+        addSuccessMessage(redirectAttributes, "Marked net " + id + " recovered");
         return "redirect:/nets";
     }
 
     @PostMapping("/{id}/mark-lost")
-    public String markLost(@PathVariable long id) {
+    public String markLost(@PathVariable long id, RedirectAttributes redirectAttributes) {
         netService.markLost(id);
+        addSuccessMessage(redirectAttributes, "Marked net " + id + " lost");
         return "redirect:/nets";
+    }
+
+    private static void addSuccessMessage(RedirectAttributes redirectAttributes, String message) {
+        List<ToastMessageResponse> toastMessages = List.of(new ToastMessageResponse(message, ToastType.SUCCESS));
+        redirectAttributes.addFlashAttribute("toastMessages", toastMessages);
     }
 }

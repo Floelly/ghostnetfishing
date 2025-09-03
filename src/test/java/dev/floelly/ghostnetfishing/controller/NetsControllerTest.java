@@ -42,10 +42,14 @@ class NetsControllerTest {
     @Mock
     INetService netService;
 
+    @Mock
+    RedirectAttributes redirectAttributes;
+
     @InjectMocks
     private NetsController netController;
 
     @Test
+        //TODO: Refactor
     void shouldReturnNewNetsContent_onGetNewNetForm() {
         Model model = new ExtendedModelMap();
         String controllerResponse = netController.getNewNetFormPage(model);
@@ -53,10 +57,10 @@ class NetsControllerTest {
     }
 
     @Test
+        //TODO: Refactor
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
         Model model = new ExtendedModelMap();
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
         doNothing().when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
         String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model, redirectAttributes);
@@ -66,10 +70,10 @@ class NetsControllerTest {
     }
 
     @Test
+    //TODO: Refactor
     void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
         BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
         Model model = new ExtendedModelMap();
-        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
 
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
@@ -79,6 +83,7 @@ class NetsControllerTest {
     }
 
     @Test
+    //TODO: Refactor
     void shouldCallServiceAndReturnNetsContent_onGetNetsPage() {
         Model model = new ExtendedModelMap();
         when(netService.getAll())
@@ -101,6 +106,16 @@ class NetsControllerTest {
     }
 
     @Test
+    void shouldThrowException_whenServiceThrowsException_onGetNetsPageWithState(){
+        Model model = new ExtendedModelMap();
+
+        doThrow(new RuntimeException()).when(netService).getAllByState(eq(NetState.RECOVERY_PENDING));
+
+        assertThrows(RuntimeException.class, () ->
+                netController.getNetsPage(model, NetState.RECOVERY_PENDING));
+    }
+
+    @Test
     void shouldThrowException_whenServiceThrowsException_onGetNetsPage(){
         Model model = new ExtendedModelMap();
 
@@ -115,7 +130,7 @@ class NetsControllerTest {
         doThrow(new RuntimeException()).when(netService).requestRecovery(any());
 
         assertThrows(RuntimeException.class, () ->
-                netController.requestNetRecovery(5L));
+                netController.requestNetRecovery(5L, redirectAttributes));
     }
 
     @Test
@@ -123,7 +138,7 @@ class NetsControllerTest {
         Long netId = UUID.randomUUID().getMostSignificantBits();
         doNothing().when(netService).requestRecovery(eq(netId));
 
-        String controllerResponse = netController.requestNetRecovery(netId);
+        String controllerResponse = netController.requestNetRecovery(netId, redirectAttributes);
 
         verify(netService).requestRecovery(eq(netId));
         assertEquals("redirect:" + REQUEST_RECOVERY_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", REQUEST_RECOVERY_REDIRECT_TEMPLATE));
@@ -134,7 +149,7 @@ class NetsControllerTest {
         doThrow(new RuntimeException()).when(netService).markRecovered(any());
 
         assertThrows(RuntimeException.class, () ->
-                netController.markRecovered(5L));
+                netController.markRecovered(5L, redirectAttributes));
     }
 
     @Test
@@ -142,7 +157,7 @@ class NetsControllerTest {
         Long netId = UUID.randomUUID().getMostSignificantBits();
         doNothing().when(netService).markRecovered(eq(netId));
 
-        String controllerResponse = netController.markRecovered(netId);
+        String controllerResponse = netController.markRecovered(netId, redirectAttributes);
 
         verify(netService).markRecovered(eq(netId));
         assertEquals("redirect:" + MARK_RECOVERED_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", MARK_RECOVERED_REDIRECT_TEMPLATE));
@@ -153,7 +168,7 @@ class NetsControllerTest {
         doThrow(new RuntimeException()).when(netService).markLost(any());
 
         assertThrows(RuntimeException.class, () ->
-                netController.markLost(5L));
+                netController.markLost(5L, redirectAttributes));
     }
 
     @Test
@@ -161,7 +176,7 @@ class NetsControllerTest {
         Long netId = UUID.randomUUID().getMostSignificantBits();
         doNothing().when(netService).markLost(eq(netId));
 
-        String controllerResponse = netController.markLost(netId);
+        String controllerResponse = netController.markLost(netId, redirectAttributes);
 
         verify(netService).markLost(eq(netId));
         assertEquals("redirect:" + MARK_LOST_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", MARK_LOST_REDIRECT_TEMPLATE));
