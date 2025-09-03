@@ -18,14 +18,6 @@ public class RequestNetRecoverySecurityTest extends AbstractH2Test {
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(roles = {})
-    void shouldDenyAccess_whenUserLacksRights_onRequestNetRecovery() throws Exception {
-        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
-                        .with(csrf()))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     void shouldRedirectToLogin_whenAnonymousUser_onRequestNetRecovery() throws Exception {
         mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
@@ -36,6 +28,15 @@ public class RequestNetRecoverySecurityTest extends AbstractH2Test {
     @Test
     @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldRedirect_whenUserHasRights_onRequestNetRecovery() throws Exception {
+        mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(NETS_ENDPOINT));
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    void shouldDenyAccess_whenUserLacksRights_onRequestNetRecovery() throws Exception {
         mockMvc.perform(post(String.format(REQUEST_NET_RECOVERY_ENDPOINT, getRandomNetId()))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())

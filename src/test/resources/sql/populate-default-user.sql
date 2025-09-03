@@ -9,7 +9,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 INSERT INTO users (user_id, username, password, phone, enabled) VALUES
                                                     (1, 'user', 'password' , null, true),
                                                     (2, 'userwithnumber', 'password','+49000000000000', true),
-                                                    (3, 'admin', 'password', null , true);
+                                                    (3, 'userwithnumberandnet', 'password','+49000000000000', true),
+                                                    (4, 'admin', 'password', null , true);
 
 -- roles
 INSERT INTO user_roles (user_id, role) VALUES
@@ -18,4 +19,6 @@ INSERT INTO user_roles (user_id, role) VALUES
                                                   (2, 'RECOVERER'),
                                                   (3, 'STANDARD'),
                                                   (3, 'RECOVERER'),
-                                                  (3, 'ADMIN');
+                                                  (4, 'STANDARD'),
+                                                  (4, 'RECOVERER'),
+                                                  (4, 'ADMIN');

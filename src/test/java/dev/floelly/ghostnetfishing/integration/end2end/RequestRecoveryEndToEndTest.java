@@ -26,9 +26,6 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private DataSource dataSource;
-
     @BeforeEach
     void setupDatabase() throws Exception {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(

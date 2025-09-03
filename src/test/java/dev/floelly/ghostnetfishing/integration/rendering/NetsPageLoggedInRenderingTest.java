@@ -25,7 +25,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 //TODO: More tests for Layout and Accessibility
 public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
 
