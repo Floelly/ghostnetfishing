@@ -14,28 +14,42 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedNetState_forNetId_onNetsPage;
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedInformation_forNetId_onNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertToastMessageExists;
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-@Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     @Autowired
     private MockMvc mockMvc;
 
     @ParameterizedTest(name = "net {0} should have status {1} after request net recovery")
     @CsvSource({
-            TestDataFactory.REPORTED_NET_ID + "," + RECOVERY_PENDING,
-            RECOVERY_PENDING_NET_ID + "," + RECOVERY_PENDING,
-            LOST_NET_ID + "," + LOST,
-            RECOVERED_NET_ID + "," + RECOVERED
+            TestDataFactory.REPORTED_NET_ID + "," + RECOVERY_PENDING + "," + true,
+            RECOVERY_PENDING_NET_ID + "," + RECOVERY_PENDING + "," + false,
+            LOST_NET_ID + "," + LOST + "," + false,
+            RECOVERED_NET_ID + "," + RECOVERED + "," + false
     })
-    @WithMockUser( roles = {SPRING_SECURITY_STANDARD_ROLE})
-    void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
+    @WithMockUser(username = "userwithnumber", roles = {SPRING_SECURITY_STANDARD_ROLE, SPRING_SECURITY_RECOVERER_ROLE})
+    void shouldUpdateState_whenLoggedIn_onRequestNetRecovery(String netId, String expectedStatus, boolean shouldAttachUser) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
-        assertExpectedNetState_forNetId_onNetsPage(doc, netId, expectedStatus);
+        assertExpectedInformation_forNetId_onNetsPage(doc, netId, expectedStatus);
+        if (shouldAttachUser) {
+            assertExpectedInformation_forNetId_onNetsPage(doc, netId, "userwithnumber");
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    void shouldShowToastError_whenLoggedWithoutPhoneNumber_onRequestNetRecovery() throws Exception {
+        MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
+
+        MockHttpSession session = getSession(requestRecoveryResult);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+
+        assertToastMessageExists(doc, NO_PERMISSION_TOAST_MESSAGE);
     }
 
     @Test

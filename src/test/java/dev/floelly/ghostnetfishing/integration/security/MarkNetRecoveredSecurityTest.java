@@ -41,7 +41,7 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, getRandomNetId()));
         MockHttpSession session = getSession(result);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
-        assertToastMessageExists(doc, "not have permission");
+        assertToastMessageExists(doc, NO_PERMISSION_TOAST_MESSAGE);
     }
 
     @Test
@@ -50,6 +50,6 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)));
         MockHttpSession session = getSession(result);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
-        assertToastMessageExists(doc, "not have permission");
+        assertToastMessageExists(doc, NO_PERMISSION_TOAST_MESSAGE);
     }
 }

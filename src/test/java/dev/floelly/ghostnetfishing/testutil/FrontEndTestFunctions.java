@@ -23,13 +23,13 @@ public final class FrontEndTestFunctions {
     public static final String MARK_LOST_FORM_QUERY = "form[method=post][action$=/mark-lost]";
     public static final String TOAST_QUERY = ".toast-container .toast";
 
-    public static void assertExpectedNetState_forNetId_onNetsPage(Document doc, String netId, String expectedState) {
+    public static void assertExpectedInformation_forNetId_onNetsPage(Document doc, String netId, String expectedInfo) {
         Elements rows = doc.select(TABLE_ROWS_QUERY_SELECTOR);
         Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, netId));
         Assertions.assertNotNull(row);
         AssertionsForClassTypes.assertThat(row.text())
-                .as(String.format("Cannot find net status '%s' in table row. Given: '%s", expectedState, row.text()))
-                .contains(expectedState);
+                .as(String.format("Cannot find net status '%s' in table row. Given: '%s", expectedInfo, row.text()))
+                .contains(expectedInfo);
     }
 
     public static void assertToastMessageExists(Document doc, String... expectedStrings) {

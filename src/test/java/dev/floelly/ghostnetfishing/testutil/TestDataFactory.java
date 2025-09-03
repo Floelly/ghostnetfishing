@@ -64,6 +64,7 @@ public final class TestDataFactory {
     public static final String LAYOUT_HTML_TAG = "footer";
     public static final String SUCCESSFULLY_REPORTED_NET_MESSAGE = "New net added successfully";
     public static final String[] INVALID_ID_TOAST_MESSAGE = {INVALID_NET_ID, "parameter"};
+    public static final String[] NO_PERMISSION_TOAST_MESSAGE = {"no", "permission"};
     public static final String[] ID_NOT_FOUND_TOAST_MESSAGE = {NOT_EXISTING_NET_ID, "id", "not found"};
     public static final String[] ILLEGAL_STATE_CHANGE_TOAST_MESSAGE = {"state"};
 

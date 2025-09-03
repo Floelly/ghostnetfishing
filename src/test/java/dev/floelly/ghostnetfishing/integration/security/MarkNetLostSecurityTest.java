@@ -41,6 +41,6 @@ public class MarkNetLostSecurityTest extends AbstractH2Test {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_LOST_ENDPOINT, getRandomNetId()));
         MockHttpSession session = getSession(result);
         Document doc = sendGetRequestToNetsPage(mockMvc, session);
-        assertToastMessageExists(doc, "not have permission");
+        assertToastMessageExists(doc, NO_PERMISSION_TOAST_MESSAGE);
     }
 }

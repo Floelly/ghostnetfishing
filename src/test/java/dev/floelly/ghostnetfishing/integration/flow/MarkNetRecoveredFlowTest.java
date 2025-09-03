@@ -13,12 +13,12 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedNetState_forNetId_onNetsPage;
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedInformation_forNetId_onNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertToastMessageExists;
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-@Sql(scripts = "/sql/populate-nets-table-diverse.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class MarkNetRecoveredFlowTest extends AbstractH2Test {
 
     @Autowired
@@ -35,7 +35,7 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
     void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
-        assertExpectedNetState_forNetId_onNetsPage(doc, netId, expectedStatus);
+        assertExpectedInformation_forNetId_onNetsPage(doc, netId, expectedStatus);
     }
 
     @Test
