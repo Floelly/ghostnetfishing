@@ -44,17 +44,17 @@
                             <td th:text="${net.size}"></td>
                             <td>
                                 <span th:text="${net.state}"></span>
-                                <br sec:authorize="isAuthenticated()" th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"/>
-                                <span sec:authorize="isAuthenticated()" th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"
+                                <br sec:authorize="isAuthenticated()" th:if="${net.owner != null and !#strings.isEmpty(net.owner)}"/>
+                                <span sec:authorize="isAuthenticated()" th:if="${net.owner != null and !#strings.isEmpty(net.owner)}"
                                       th:text="${'by ' +net.owner}"></span>
                             </td>
-                            <td sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
+                            <td sec:authorize="isAuthenticated()">
                                 <div class="d-flex gap-3" >
-                                    <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post">
+                                    <form sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).RECOVERER.name())"  th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post">
                                         <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${!net.state.name().equals('REPORTED')}">Mark for Recovery</button>
                                     </form>
-                                    <form th:action="@{/nets/{id}/mark-recovered(id=${net.id})}" method="post">
-                                        <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${!net.state.name().equals('RECOVERY_PENDING')}">Mark as Recovered</button>
+                                    <form sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).RECOVERER.name())" th:action="@{/nets/{id}/mark-recovered(id=${net.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${!net.state.name().equals('RECOVERY_PENDING') or net.owner != #authentication.name}">Mark as Recovered</button>
                                     </form>
                                     <form th:action="@{/nets/{id}/mark-lost(id=${net.id})}" method="post">
                                         <button type="submit" class="btn btn-sm btn-primary" th:attr="disabled=${net.state.name().equals('LOST') || net.state.name().equals('RECOVERED')}">Mark as Lost</button>
