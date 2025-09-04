@@ -13,8 +13,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertExpectedInformation_forNetId_onNetsPage;
-import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertToastMessageExists;
+import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
@@ -36,6 +35,7 @@ public class MarkLostFlowTest extends AbstractH2Test {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_LOST_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
         assertExpectedInformation_forNetId_onNetsPage(doc, netId, expectedStatus);
+        assertNotExpectedInformation_forNetId_onNetsPage(doc, netId, USERNAME_WITH_NUMBER_AND_NET);
     }
 
     @Test

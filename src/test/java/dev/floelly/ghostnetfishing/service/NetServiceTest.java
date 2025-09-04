@@ -380,6 +380,9 @@ class NetServiceTest {
         // given
         Long netId = UUID.randomUUID().getMostSignificantBits();
         Net databaseNet = createDefaultNet(netId, state);
+        if(state.equals(NetState.RECOVERY_PENDING)) {
+            databaseNet.setUser(new User());
+        }
 
         // when
         when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
@@ -411,6 +414,10 @@ class NetServiceTest {
         assertThat(updatedNet.getState())
                 .as("should update net state.")
                 .isEqualTo(NetState.LOST);
+
+        assertThat(updatedNet.getUser())
+                .as("should remove attached user.")
+                .isNull();
     }
 
     @Test

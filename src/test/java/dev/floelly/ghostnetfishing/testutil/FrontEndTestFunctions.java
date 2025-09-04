@@ -32,6 +32,15 @@ public final class FrontEndTestFunctions {
                 .contains(expectedInfo);
     }
 
+    public static void assertNotExpectedInformation_forNetId_onNetsPage(Document doc, String netId, String notExpectedInfo) {
+        Elements rows = doc.select(TABLE_ROWS_QUERY_SELECTOR);
+        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, netId));
+        Assertions.assertNotNull(row);
+        AssertionsForClassTypes.assertThat(row.text())
+                .as(String.format("Should not contain info '%s' in table row, but does. Given: '%s", notExpectedInfo, row.text()))
+                .doesNotContain(notExpectedInfo);
+    }
+
     public static void assertToastMessageExists(Document doc, String... expectedStrings) {
         Elements toastMessages = doc.select(TOAST_QUERY);
         List<String> toastMessageStrings = toastMessages.stream().map(Element::text).toList();
