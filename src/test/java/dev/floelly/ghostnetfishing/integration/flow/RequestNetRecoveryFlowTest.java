@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -19,7 +18,6 @@ import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertT
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     @Autowired
     private MockMvc mockMvc;
