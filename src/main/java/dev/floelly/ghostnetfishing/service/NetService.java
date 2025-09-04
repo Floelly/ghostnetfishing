@@ -87,8 +87,11 @@ public class NetService implements INetService {
     @Override
     public void markLost(Long id) {
         Net net = netRepository.findByNetId(id).orElseThrow(() -> new NetNotFoundException(id));
-        if(net.getState().equals(NetState.RECOVERED) || net.getState().equals(NetState.LOST)){
+        if(!net.getState().equals(NetState.RECOVERY_PENDING) && !net.getState().equals(NetState.REPORTED)){
             throw new IllegalNetStateChangeException(id, net.getState(), NetState.LOST);
+        }
+        if(net.getState().equals(NetState.RECOVERY_PENDING)){
+            net.setUser(null);
         }
         net.setState(NetState.LOST);
         netRepository.save(net);
