@@ -10,7 +10,6 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.sql.DataSource;
 import java.sql.*;
 
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.sendPostRequestAndExpectRedirect;
@@ -27,7 +26,7 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    void setupDatabase() throws Exception {
+    void setupDatabase() {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
                 new ClassPathResource("sql/populate-default-user.sql"),
                 new ClassPathResource("sql/populate-nets-table-diverse.sql")
@@ -36,13 +35,13 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
     }
 
     @Test
-    @WithMockUser(username = "userwithnumber", roles = {SPRING_SECURITY_STANDARD_ROLE, SPRING_SECURITY_RECOVERER_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_STANDARD_ROLE, SPRING_SECURITY_RECOVERER_ROLE})
     void shouldLinkUserToNet_whenPhoneNumber_onRequestRecovery() throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
 
         try (Connection connection = getTestContainerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_NET_RECOVERY_FOR_REPORTED_NET_QUERY);
-             ResultSet rs = preparedStatement.executeQuery();
+             ResultSet rs = preparedStatement.executeQuery()
         )
         {
             assertTrue(rs.next());
@@ -52,13 +51,13 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME, roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldNotLinkUserToNet_whenNoPhoneNumber_onRequestRecovery() throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
 
         try (Connection connection = getTestContainerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_NET_RECOVERY_FOR_REPORTED_NET_QUERY);
-             ResultSet rs = preparedStatement.executeQuery();
+             ResultSet rs = preparedStatement.executeQuery()
         )
         {
             assertTrue(rs.next());
@@ -73,7 +72,7 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
 
         try (Connection connection = getTestContainerConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(GET_NET_RECOVERY_FOR_REPORTED_NET_QUERY);
-             ResultSet rs = preparedStatement.executeQuery();
+             ResultSet rs = preparedStatement.executeQuery()
         )
         {
             assertTrue(rs.next());
