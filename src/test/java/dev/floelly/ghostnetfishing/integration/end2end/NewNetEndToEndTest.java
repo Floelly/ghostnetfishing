@@ -3,7 +3,6 @@ package dev.floelly.ghostnetfishing.integration.end2end;
 import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Connection;
@@ -16,7 +15,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
 class NewNetEndToEndTest extends AbstractMySQLContainerTest {
 
     @Autowired

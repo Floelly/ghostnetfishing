@@ -3,7 +3,6 @@ package dev.floelly.ghostnetfishing.integration.end2end;
 import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -15,7 +14,6 @@ import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
 public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
     private static final String GET_NET_RECOVERY_FOR_REPORTED_NET_QUERY = String.format("Select %s, %s FROM %s Where %s = %s LIMIT 1", "state", "user_id", "nets", "net_id", REPORTED_NET_ID);
 
