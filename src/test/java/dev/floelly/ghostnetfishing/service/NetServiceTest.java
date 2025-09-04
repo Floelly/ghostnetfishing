@@ -68,8 +68,10 @@ class NetServiceTest {
 
     @Test
     void shouldReturnAllSavedNetDTOs_onGetAll() {
+        User netOwner = new User();
+        netOwner.setUsername("Gustav");
         Net net1 = new Net( null, 123L,1.0, 2.0, NetSize.L, NetState.REPORTED, null);
-        Net net2 = new Net(null, 456L, 3.0, 4.0, NetSize.M, NetState.RECOVERY_PENDING, null);
+        Net net2 = new Net(null, 456L, 3.0, 4.0, NetSize.M, NetState.RECOVERY_PENDING, netOwner);
         when(netRepository.findAll()).thenReturn(List.of(net1, net2));
 
         List<NetDTO> result = netService.getAll();
@@ -80,13 +82,13 @@ class NetServiceTest {
 
         assertThat(result.get(0))
                 .as("First DTO should match first entity")
-                .extracting(NetDTO::getId, NetDTO::getLocationLat, NetDTO::getLocationLong, NetDTO::getSize, NetDTO::getState)
-                .containsExactly(net1.getNetId(), net1.getLocationLat(), net1.getLocationLong(), net1.getSize(), net1.getState());
+                .extracting(NetDTO::getId, NetDTO::getLocationLat, NetDTO::getLocationLong, NetDTO::getSize, NetDTO::getState, NetDTO::getOwner)
+                .containsExactly(net1.getNetId(), net1.getLocationLat(), net1.getLocationLong(), net1.getSize(), net1.getState(), null);
 
         assertThat(result.get(1))
                 .as("Second DTO should match second entity")
-                .extracting(NetDTO::getId, NetDTO::getLocationLat, NetDTO::getLocationLong, NetDTO::getSize, NetDTO::getState)
-                .containsExactly(net2.getNetId(), net2.getLocationLat(), net2.getLocationLong(), net2.getSize(), net2.getState());
+                .extracting(NetDTO::getId, NetDTO::getLocationLat, NetDTO::getLocationLong, NetDTO::getSize, NetDTO::getState, NetDTO::getOwner)
+                .containsExactly(net2.getNetId(), net2.getLocationLat(), net2.getLocationLong(), net2.getSize(), net2.getState(), net2.getUser().getUsername());
     }
 
     @Test

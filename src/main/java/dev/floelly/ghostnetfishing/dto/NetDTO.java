@@ -15,4 +15,5 @@ public class NetDTO {
     private Double locationLong;
     private NetSize size;
     private NetState state;
+    private String owner;
 }

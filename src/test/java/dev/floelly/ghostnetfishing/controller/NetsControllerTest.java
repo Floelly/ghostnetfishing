@@ -38,7 +38,7 @@ class NetsControllerTest {
 
     private static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
     public static final NewNetRequest VALID_NEW_NET_REQUEST = new NewNetRequest(20.0, 20.0, NetSize.L);
-    public static final NetDTO VALID_NET_DTO = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING);
+    public static final NetDTO VALID_NET_DTO = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING, "Gustav");
 
     @Mock
     INetService netService;

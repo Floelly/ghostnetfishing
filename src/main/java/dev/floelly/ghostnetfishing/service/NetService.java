@@ -34,7 +34,8 @@ public class NetService implements INetService {
                         net.getLocationLat(),
                         net.getLocationLong(),
                         net.getSize(),
-                        net.getState())
+                        net.getState(),
+                        net.getUser() != null? net.getUser().getUsername() : null)
                 ).collect(Collectors.toList());
     }
 

@@ -42,7 +42,12 @@
                             <td th:text="${#numbers.formatDecimal(net.locationLat, 1, 4)}"></td>
                             <td th:text="${#numbers.formatDecimal(net.locationLong, 1, 4)}"></td>
                             <td th:text="${net.size}"></td>
-                            <td th:text="${net.state}"></td>
+                            <td>
+                                <span th:text="${net.state}"></span>
+                                <br th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"/>
+                                <span th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"
+                                      th:text="${'by ' +net.owner}"></span>
+                            </td>
                             <td sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
                                 <div class="d-flex gap-3" >
                                     <form th:action="@{/nets/{id}/request-recovery(id=${net.id})}" method="post">
