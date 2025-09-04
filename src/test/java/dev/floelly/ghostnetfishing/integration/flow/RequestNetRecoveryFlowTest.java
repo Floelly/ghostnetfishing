@@ -3,7 +3,6 @@ package dev.floelly.ghostnetfishing.integration.flow;
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
 import dev.floelly.ghostnetfishing.testutil.TestDataFactory;
 import org.jsoup.nodes.Document;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -32,18 +31,18 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
             LOST_NET_ID + "," + LOST + "," + false,
             RECOVERED_NET_ID + "," + RECOVERED + "," + false
     })
-    @WithMockUser(username = "userwithnumber", roles = {SPRING_SECURITY_STANDARD_ROLE, SPRING_SECURITY_RECOVERER_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldUpdateState_whenLoggedIn_onRequestNetRecovery(String netId, String expectedStatus, boolean shouldAttachUser) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
         assertExpectedInformation_forNetId_onNetsPage(doc, netId, expectedStatus);
         if (shouldAttachUser) {
-            assertExpectedInformation_forNetId_onNetsPage(doc, netId, "userwithnumber");
+            assertExpectedInformation_forNetId_onNetsPage(doc, netId, USERNAME_WITH_NUMBER);
         }
     }
 
     @Test
-    @WithMockUser(username = "user", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_whenLoggedWithoutPhoneNumber_onRequestNetRecovery() throws Exception {
         MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)));
 
@@ -54,7 +53,7 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_whenWrongId_onRequestNetRecovery() throws Exception {
         MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, REQUEST_NET_RECOVERY_ENDPOINT.replace("%d", INVALID_NET_ID));
 
@@ -65,7 +64,7 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_WhenNetIdNotFound_onRequestNetRecovery() throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(NOT_EXISTING_NET_ID)));
         MockHttpSession session = getSession(result);
@@ -75,7 +74,7 @@ public class RequestNetRecoveryFlowTest extends AbstractH2Test {
 
     @ParameterizedTest
     @ValueSource(strings = {RECOVERED_NET_ID, LOST_NET_ID, RECOVERY_PENDING_NET_ID})
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_WhenIllegalNetStateChange_onRequestNetRecovery(String netId) throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(netId)));
         MockHttpSession session = getSession(result);

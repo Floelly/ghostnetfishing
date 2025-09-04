@@ -30,13 +30,13 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldRedirect_whenUserHasRights_onMarkNetRecovered() throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)));
     }
 
     @Test
-    @WithMockUser(roles = {})
+    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
     void shouldDenyAccess_whenLacksRights_onMarkNetRecovered() throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, getRandomNetId()));
         MockHttpSession session = getSession(result);
@@ -45,7 +45,7 @@ public class MarkNetRecoveredSecurityTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(username="userwithnumber", roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username= USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldDenyAccess_whenUserDoesNotOwnNet_onMarkNetRecovered() throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)));
         MockHttpSession session = getSession(result);

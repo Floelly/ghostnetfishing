@@ -18,7 +18,7 @@ import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertT
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class MarkNetRecoveredFlowTest extends AbstractH2Test {
 
     @Autowired
@@ -31,15 +31,26 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
             LOST_NET_ID + "," + LOST,
             RECOVERED_NET_ID + "," + RECOVERED
     })
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
-    void shouldUpdateState_whenLoggedIn_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
+    @WithMockUser(username = USERNAME_WITH_NUMBER_AND_NET, roles = {SPRING_SECURITY_RECOVERER_ROLE})
+    void shouldUpdateState_whenOwningNet_onMarkNetRecovered(String netId, String expectedStatus) throws Exception {
         sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(netId)));
         Document doc = sendGetRequestToNetsPage(mockMvc);
         assertExpectedInformation_forNetId_onNetsPage(doc, netId, expectedStatus);
     }
 
     @Test
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_RECOVERER_ROLE})
+    void shouldShowToastError_whenNotOwnerOfNet_onMarkNetRecovered() throws Exception {
+        MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)));
+
+        MockHttpSession session = getSession(requestRecoveryResult);
+        Document doc = sendGetRequestToNetsPage(mockMvc, session);
+
+        assertToastMessageExists(doc, NO_PERMISSION_TOAST_MESSAGE);
+    }
+
+    @Test
+    @WithMockUser(username = USERNAME_WITH_NUMBER_AND_NET, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_whenWrongId_onMarkNetRecovered() throws Exception {
         MvcResult requestRecoveryResult = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, MARK_NET_RECOVERED_ENDPOINT.replace("%d", INVALID_NET_ID));
 
@@ -50,7 +61,7 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
     }
 
     @Test
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER_AND_NET, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_WhenNetIdNotFound_onMarkNetRecovered() throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(NOT_EXISTING_NET_ID)));
         MockHttpSession session = getSession(result);
@@ -60,7 +71,7 @@ public class MarkNetRecoveredFlowTest extends AbstractH2Test {
 
     @ParameterizedTest
     @ValueSource(strings = {RECOVERED_NET_ID, LOST_NET_ID})
-    @WithMockUser(roles = {SPRING_SECURITY_STANDARD_ROLE})
+    @WithMockUser(username = USERNAME_WITH_NUMBER_AND_NET, roles = {SPRING_SECURITY_RECOVERER_ROLE})
     void shouldShowToastError_WhenIllegalNetStateChange_onMarkNetRecovered(String netId) throws Exception {
         MvcResult result = sendPostRequestAndExpectRedirectToNetsPage(mockMvc, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(netId)));
         MockHttpSession session = getSession(result);

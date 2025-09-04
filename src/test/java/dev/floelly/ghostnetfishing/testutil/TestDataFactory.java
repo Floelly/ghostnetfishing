@@ -56,6 +56,10 @@ public final class TestDataFactory {
     public static final String RECOVERED_NET_ID = "1003";
     public static final String RECOVERY_PENDING_NET_ID = "1004";
     public static final String NOT_EXISTING_NET_ID = "0";
+    public static final String USERNAME = "user";
+    public static final String USERNAME_WITH_NUMBER = "userwithnumber";
+    public static final String USERNAME_WITH_NUMBER_AND_NET = "userwithnumberandnet";
+    public static final String ADMIN_USERNAME = "admin";
 
     //front end messages
     public static final String NEW_GHOST_NET_HEADLINE = "Report new ghost net";
