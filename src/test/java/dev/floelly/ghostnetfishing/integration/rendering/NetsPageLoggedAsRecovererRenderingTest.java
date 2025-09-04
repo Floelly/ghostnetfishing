@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -19,16 +20,17 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.stream.Stream;
 
 import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
+import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.sendGetRequestToNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 //TODO: More tests for Layout and Accessibility
-public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
+public class NetsPageLoggedAsRecovererRenderingTest extends AbstractH2Test {
 
     private Element reportedNetRow;
     private Element recoveryPendingNetRow;
@@ -41,7 +43,7 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
     @BeforeAll
     public void setUp() throws Exception {
         MvcResult result = mockMvc.perform(get(NETS_ENDPOINT)
-                        .with(user(USERNAME).roles(SPRING_SECURITY_STANDARD_ROLE)))
+                        .with(user(USERNAME_WITH_NUMBER).roles(SPRING_SECURITY_RECOVERER_ROLE)))
                 .andReturn();
         Document document = Jsoup.parse(result.getResponse().getContentAsString());
         Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);
@@ -56,6 +58,24 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
     }
 
     @ParameterizedTest
+    @MethodSource("requestRecoveryFormRowProvider")
+    void shouldRenderRequestRecoveryButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
+        Element form = row.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
+        assertNotNull(form);
+        assertThat(form.attr("action")).isEqualTo(formAction);
+        assertContainsSubmitButton(form, disabled);
+    }
+
+    @ParameterizedTest
+    @MethodSource("markRecoveredFormRowProvider")
+    void shouldRenderMarkRecoveredButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction) {
+        Element form = row.selectFirst(MARK_RECOVERED_FORM_QUERY);
+        assertNotNull(form);
+        assertThat(form.attr("action")).isEqualTo(formAction);
+        assertContainsSubmitButton(form, true);
+    }
+
+    @ParameterizedTest
     @MethodSource("markLostFormRowProvider")
     void shouldRenderMarkLostButtonWithCorrectPostAction_whenLoggedIn_onNetsPage(Element row, String formAction, boolean disabled) {
         Element form = row.selectFirst(MARK_LOST_FORM_QUERY);
@@ -64,18 +84,17 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
         assertContainsSubmitButton(form, disabled);
     }
 
-    @ParameterizedTest
-    @MethodSource("rowProvider")
-    void shouldNotRenderRequestRecoveryButton_whenNotRecoverer_onNetsPage(Element row) {
-        Element form = row.selectFirst(REQUEST_RECOVERY_FORM_QUERY);
-        assertNull(form);
-    }
-
-    @ParameterizedTest
-    @MethodSource("rowProvider")
-    void shouldNotRenderMarkRecoveredButton_whenNotRecoverer_onNetsPage(Element row) {
+    @Test
+    @WithMockUser(username = USERNAME_WITH_NUMBER_AND_NET, roles = SPRING_SECURITY_RECOVERER_ROLE)
+    void shouldRenderMarkRecoveredButtonWithCorrectPostAction_whenOwningNet_onNetsPage() throws Exception {
+        Document document = sendGetRequestToNetsPage(mockMvc);
+        Elements rows = document.select(TABLE_ROWS_QUERY_SELECTOR);
+        Element row = rows.selectFirst(String.format(NET_ID_TR_QUERY, RECOVERY_PENDING_NET_ID));
+        assertNotNull(row);
         Element form = row.selectFirst(MARK_RECOVERED_FORM_QUERY);
-        assertNull(form);
+        assertNotNull(form);
+        assertThat(form.attr("action")).isEqualTo(String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)));
+        assertContainsSubmitButton(form, false);
     }
 
     @Test
@@ -83,12 +102,20 @@ public class NetsPageLoggedInRenderingTest extends AbstractH2Test {
         assertThat(recoveryPendingNetRow.text()).contains(USERNAME_WITH_NUMBER_AND_NET);
     }
 
-    public Stream<Arguments> rowProvider() {
+    public Stream<Arguments> requestRecoveryFormRowProvider() {
         return Stream.of(
-                Arguments.of(reportedNetRow),
-                Arguments.of(recoveryPendingNetRow),
-                Arguments.of(recoveredNetRow),
-                Arguments.of(lostNetRow)
+                Arguments.of(reportedNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(REPORTED_NET_ID)), false),
+                Arguments.of(recoveryPendingNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID)), true),
+                Arguments.of(recoveredNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(RECOVERED_NET_ID)), true),
+                Arguments.of(lostNetRow, String.format(REQUEST_NET_RECOVERY_ENDPOINT, Long.valueOf(LOST_NET_ID)), true)
+        );
+    }
+    public Stream<Arguments> markRecoveredFormRowProvider() {
+        return Stream.of(
+                Arguments.of(reportedNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(REPORTED_NET_ID))),
+                Arguments.of(recoveryPendingNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERY_PENDING_NET_ID))),
+                Arguments.of(recoveredNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(RECOVERED_NET_ID))),
+                Arguments.of(lostNetRow, String.format(MARK_NET_RECOVERED_ENDPOINT, Long.valueOf(LOST_NET_ID)))
         );
     }
 

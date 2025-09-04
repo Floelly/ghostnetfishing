@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.sendGetRequestToNetsPage;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -67,6 +69,11 @@ public class NetsPagePublicRenderingTest extends AbstractH2Test {
     void shouldNotRenderMarkLostButton_whenNotLoggedIn_onNetsPage(Element row) {
         Element form = row.selectFirst(MARK_LOST_FORM_QUERY);
         assertNull(form);
+    }
+
+    @Test
+    void shouldNotShowRecoverer_whenNotLoggedIn_onNetsPage() {
+        assertThat(recoveryPendingNetRow.text()).doesNotContain(USERNAME_WITH_NUMBER_AND_NET);
     }
 
     public Stream<Arguments> rowProvider() {
