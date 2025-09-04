@@ -3,6 +3,7 @@ package dev.floelly.ghostnetfishing.integration.flow;
 import dev.floelly.ghostnetfishing.testutil.AbstractH2Test;
 import dev.floelly.ghostnetfishing.testutil.TestDataFactory;
 import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -19,7 +20,7 @@ import static dev.floelly.ghostnetfishing.testutil.FrontEndTestFunctions.assertT
 import static dev.floelly.ghostnetfishing.testutil.MvcTestFunctions.*;
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 
-@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-default-user.sql", "/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class RequestNetRecoveryFlowTest extends AbstractH2Test {
     @Autowired
     private MockMvc mockMvc;

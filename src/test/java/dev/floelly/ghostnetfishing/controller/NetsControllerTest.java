@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -41,6 +42,9 @@ class NetsControllerTest {
 
     @Mock
     INetService netService;
+
+    @Mock
+    UserDetails userDetails;
 
     @Mock
     RedirectAttributes redirectAttributes;
@@ -127,20 +131,24 @@ class NetsControllerTest {
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onRequestNetRecovery() {
-        doThrow(new RuntimeException()).when(netService).requestRecovery(any());
+        when(userDetails.getUsername()).thenReturn("username");
+        doThrow(new RuntimeException()).when(netService).requestRecovery(any(), any());
 
         assertThrows(RuntimeException.class, () ->
-                netController.requestNetRecovery(5L, redirectAttributes));
+                netController.requestNetRecovery(5L, redirectAttributes, userDetails));
     }
 
     @Test
     void shouldCallServiceAndReturnRedirect_onRequestNetRecovery() {
         Long netId = UUID.randomUUID().getMostSignificantBits();
-        doNothing().when(netService).requestRecovery(eq(netId));
+        doReturn("username").when(userDetails).getUsername();
+        when(userDetails.getUsername()).thenReturn("username");
+        doNothing().when(netService).requestRecovery(eq(netId), eq("username"));
 
-        String controllerResponse = netController.requestNetRecovery(netId, redirectAttributes);
+        String controllerResponse = netController.requestNetRecovery(netId, redirectAttributes, userDetails);
 
-        verify(netService).requestRecovery(eq(netId));
+        verify(netService).requestRecovery(eq(netId), eq("username"));
+        verify(userDetails).getUsername();
         assertEquals("redirect:" + REQUEST_RECOVERY_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", REQUEST_RECOVERY_REDIRECT_TEMPLATE));
     }
 

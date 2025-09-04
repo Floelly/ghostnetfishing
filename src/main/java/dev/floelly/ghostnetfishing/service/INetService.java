@@ -11,7 +11,7 @@ public interface INetService {
 
     List<NetDTO> getAll();
 
-    void requestRecovery(Long id);
+    void requestRecovery(Long id, String username);
 
     List<NetDTO> getAllByState(NetState state);
 

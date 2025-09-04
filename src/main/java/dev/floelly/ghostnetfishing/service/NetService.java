@@ -2,22 +2,22 @@ package dev.floelly.ghostnetfishing.service;
 
 import dev.floelly.ghostnetfishing.dto.NetDTO;
 import dev.floelly.ghostnetfishing.dto.NewNetRequest;
-import dev.floelly.ghostnetfishing.model.IllegalNetStateChangeException;
-import dev.floelly.ghostnetfishing.model.Net;
-import dev.floelly.ghostnetfishing.model.NetNotFoundException;
-import dev.floelly.ghostnetfishing.model.NetState;
+import dev.floelly.ghostnetfishing.model.*;
 import dev.floelly.ghostnetfishing.repository.NetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class NetService implements INetService {
     private final NetRepository netRepository;
+    private final IUserService userService;
 
     public void addNewNet(NewNetRequest newNetRequest) {
         Net newNet = new Net(
@@ -40,12 +40,20 @@ public class NetService implements INetService {
 
     @Override
     @Transactional
-    public void requestRecovery(Long id) {
+    public void requestRecovery(Long id, String username) {
         Net net = netRepository.findByNetId(id).orElseThrow(() -> new NetNotFoundException(id));
         if(!net.getState().equals(NetState.REPORTED)){
             throw new IllegalNetStateChangeException(id, net.getState(), NetState.RECOVERY_PENDING);
         }
+        if(net.getUser() != null){
+            throw new IllegalNetStateException("This net should not have state " + NetState.RECOVERY_PENDING + "and a user");
+        }
+        User user = userService.findByUsername(username);
+        if(Objects.isNull(user.getPhone()) || user.getPhone().isBlank()){
+            throw new AccessDeniedException("You need to register with a phone number, to use this function");
+        }
         net.setState(NetState.RECOVERY_PENDING);
+        net.setUser(user);
         netRepository.save(net);
     }
 

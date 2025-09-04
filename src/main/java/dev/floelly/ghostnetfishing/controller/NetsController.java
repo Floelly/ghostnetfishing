@@ -10,6 +10,8 @@ import dev.floelly.ghostnetfishing.service.INetService;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -79,8 +81,8 @@ public class NetsController {
     }
 
     @PostMapping("/{id}/request-recovery")
-    public String requestNetRecovery(@PathVariable long id, RedirectAttributes redirectAttributes) {
-        netService.requestRecovery(id);
+    public String requestNetRecovery(@PathVariable long id, RedirectAttributes redirectAttributes, @AuthenticationPrincipal UserDetails userDetails) {
+        netService.requestRecovery(id, userDetails.getUsername());
         addSuccessMessage(redirectAttributes, "Request recovery requested successfully for net " + id);
         return "redirect:/nets";
     }
