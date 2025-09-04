@@ -32,7 +32,6 @@ public class SpringSecurityIntegrationTest extends AbstractMySQLContainerTest {
     private MockMvc mockMvc;
 
     @Test
-    @Sql("/sql/populate-default-user.sql")
     void shouldAuthenticateAndPutUserIntoSecurityContext() throws Exception {
         MvcResult result = mockMvc.perform(post(LOGIN_ENDPOINT)
                         .param("username", USERNAME_ADMIN)

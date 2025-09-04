@@ -11,10 +11,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 class NewNetEndToEndTest extends AbstractMySQLContainerTest {
@@ -34,39 +34,39 @@ class NewNetEndToEndTest extends AbstractMySQLContainerTest {
         String randomLongitude = getRandomLongitude();
         String size = getRandomNetSize();
 
-        int responseStatus = mockMvc.perform(post(NETS_NEW_ENDPOINT)
+        mockMvc.perform(post(NETS_NEW_ENDPOINT)
                         .param(LOCATION_LAT, randomLatitude)
                         .param(LOCATION_LONG, randomLongitude)
                         .param(SIZE, size)
                         .with(csrf()))
-                .andReturn()
-                .getResponse()
-                .getStatus();
-
-        assertThat(responseStatus).isLessThan(400);
+                .andExpect(status().is3xxRedirection());
 
         try (Connection conn = getTestContainerConnection();
              PreparedStatement ps = conn.prepareStatement(
                     String.format("SELECT %s, %s, %s FROM %s ORDER BY id DESC",
-                            DB_COLUMN_LATITUDE,
-                            DB_COLUMN_LONGITUDE,
-                            DB_COLUMN_SIZE,
-                            DB_COLUMN_NETS));
+                            DB_COLUMN_LATITUDE, DB_COLUMN_LONGITUDE, DB_COLUMN_SIZE, DB_TABLE_NETS));
              ResultSet rs = ps.executeQuery()
 
         ) {
+            boolean exists = false;
 
-            assertTrue(rs.next(), "Should persist at least one net in database");
+            while (rs.next()) {
+                double dbLat = rs.getDouble(DB_COLUMN_LATITUDE);
+                double dbLong = rs.getDouble(DB_COLUMN_LONGITUDE);
+                String dbSize = rs.getString(DB_COLUMN_SIZE);
 
-            double dbLat = rs.getDouble(DB_COLUMN_LATITUDE);
-            double dbLong = rs.getDouble(DB_COLUMN_LONGITUDE);
-            String dbSize = rs.getString(DB_COLUMN_SIZE);
-
-            assertEquals(Double.parseDouble(randomLatitude), dbLat, 0.0001, "Latitude of first persisted net does not match input value");
-            assertEquals(Double.parseDouble(randomLongitude), dbLong, 0.0001, "Longitude of first persisted net does not match input value");
-            assertEquals(size, dbSize, "Size of first persisted net does not match input value");
-            assertFalse(rs.next(), "Should not have more than one persisted net");
+                if (isEqualDouble(dbLat, randomLatitude) &&
+                        isEqualDouble(dbLong, randomLongitude) &&
+                        dbSize.equals(size)) {
+                    exists = true;
+                    break;
+                }
+            }
+            assertTrue(exists, "Persisted net not found in database");
         }
+    }
 
+    private static boolean isEqualDouble(double dbLat, String randomLatitude) {
+        return Math.abs(dbLat - Double.parseDouble(randomLatitude)) > 0.001;
     }
 }

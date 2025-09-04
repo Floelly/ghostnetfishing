@@ -1,13 +1,12 @@
 package dev.floelly.ghostnetfishing.testutil;
 
-
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -18,6 +17,8 @@ import java.sql.*;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@Sql(scripts = {"/sql/populate-default-user.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/sql/populate-nets-table-diverse.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public abstract class AbstractMySQLContainerTest {
 
     public static final MySQLContainer<?> MYSQL_CONTAINER;
@@ -44,24 +45,5 @@ public abstract class AbstractMySQLContainerTest {
         return DriverManager.getConnection(
                 MYSQL_CONTAINER.getJdbcUrl(), MYSQL_CONTAINER.getUsername(), MYSQL_CONTAINER.getPassword()
         );
-    }
-
-    @BeforeEach
-    void cleanDatabase() throws SQLException {
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute("SET FOREIGN_KEY_CHECKS = 0");
-            // hole alle Tabellen automatisch
-            ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[]{"TABLE"});
-            while(rs.next()){
-                String table = rs.getString("TABLE_NAME");
-                // behalte users und authorities
-                if(table.equals("users") || table.equals("authorities") || table.equals("user_roles")){
-                    continue;
-                }
-                stmt.execute("TRUNCATE TABLE " + table);
-            }
-            stmt.execute("SET FOREIGN_KEY_CHECKS = 1");
-        }
     }
 }

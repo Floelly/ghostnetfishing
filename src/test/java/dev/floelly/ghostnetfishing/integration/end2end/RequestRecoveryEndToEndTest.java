@@ -1,12 +1,9 @@
 package dev.floelly.ghostnetfishing.integration.end2end;
 
 import dev.floelly.ghostnetfishing.testutil.AbstractMySQLContainerTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,15 +21,6 @@ public class RequestRecoveryEndToEndTest extends AbstractMySQLContainerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @BeforeEach
-    void setupDatabase() {
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
-                new ClassPathResource("sql/populate-default-user.sql"),
-                new ClassPathResource("sql/populate-nets-table-diverse.sql")
-        );
-        populator.execute(dataSource);
-    }
 
     @Test
     @WithMockUser(username = USERNAME_WITH_NUMBER, roles = {SPRING_SECURITY_STANDARD_ROLE, SPRING_SECURITY_RECOVERER_ROLE})

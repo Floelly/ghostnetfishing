@@ -46,7 +46,7 @@ public final class TestDataFactory {
     public static final String DB_COLUMN_LATITUDE = "location_lat";
     public static final String DB_COLUMN_LONGITUDE = "location_long";
     public static final String DB_COLUMN_SIZE = "size";
-    public static final String DB_COLUMN_NETS = "nets";
+    public static final String DB_TABLE_NETS = "nets";
     public static final String SPRING_SECURITY_STANDARD_ROLE = "STANDARD";
     public static final String SPRING_SECURITY_RECOVERER_ROLE = "RECOVERER";
 
