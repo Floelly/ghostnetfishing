@@ -44,8 +44,8 @@
                             <td th:text="${net.size}"></td>
                             <td>
                                 <span th:text="${net.state}"></span>
-                                <br th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"/>
-                                <span th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"
+                                <br sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())" th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"/>
+                                <span sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())" th:if="${net.state.name == 'RECOVERY_PENDING' and net.owner != null and !#strings.isEmpty(net.owner)}"
                                       th:text="${'by ' +net.owner}"></span>
                             </td>
                             <td sec:authorize="hasRole(T(dev.floelly.ghostnetfishing.model.Role).STANDARD.name())">
