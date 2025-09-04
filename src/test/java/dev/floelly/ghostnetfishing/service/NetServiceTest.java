@@ -222,14 +222,26 @@ class NetServiceTest {
     void shouldUpdateRepository_whenNetStateIsValid_onMarkRecovered(NetState state) {
         // given
         Long netId = UUID.randomUUID().getMostSignificantBits();
+        Long userId = UUID.randomUUID().getMostSignificantBits();
+        String username = "username";
+        User user = new User();
+        user.setUsername(username);
+        user.setPhone("123456789");
+        user.setId(userId);
         Net databaseNet = createDefaultNet(netId, state);
+        if(state.equals(NetState.RECOVERY_PENDING)) {
+            databaseNet.setUser(user);
+        }
 
         // when
         when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
-        netService.markRecovered(netId);
+        when(userService.findByUsername(eq(username))).thenReturn(user);
+        netService.markRecovered(netId, username);
 
         // then
         verify(netRepository).findByNetId(eq(netId));
+
+        verify(userService).findByUsername(eq(username));
 
         ArgumentCaptor<Net> netCaptor = ArgumentCaptor.forClass(Net.class);
         verify(netRepository).save(netCaptor.capture());
@@ -254,6 +266,80 @@ class NetServiceTest {
         assertThat(updatedNet.getState())
                 .as("should update net state.")
                 .isEqualTo(NetState.RECOVERED);
+
+        assertThat(updatedNet.getUser())
+                .as(String.format("should not be owned by any one. Given user: %s.", updatedNet.getUser()))
+                .isNull();
+    }
+
+    @Test
+    void shouldThrowIllegalNetStateException_whenRecoveryPendingWithoutUser_OnMarkRecovered() {
+        // given
+        Long netId = 0L;
+        String username = "username";
+        Net databaseNet = createDefaultNet(netId, NetState.RECOVERY_PENDING);
+
+        //when
+        when(netRepository.findByNetId(any())).thenReturn(Optional.of(databaseNet));
+
+        assertThrows(IllegalNetStateException.class, () -> netService.markRecovered(netId, username));
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+        verify(userService, never()).findByUsername(any());
+        verify(netRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowAccessDeniedException_whenNotOwningNet_OnMarkRecovered() {
+        // given
+        Long netId = 0L;
+
+        User user = new User();
+        String username = "username";
+        user.setUsername(username);
+        user.setId(UUID.randomUUID().getMostSignificantBits());
+        user.setPhone("123456789");
+
+        User netOwner = new User();
+        netOwner.setId(UUID.randomUUID().getMostSignificantBits());
+        Net databaseNet = createDefaultNet(netId, NetState.RECOVERY_PENDING);
+        databaseNet.setUser(netOwner);
+
+        //when
+        when(netRepository.findByNetId(any())).thenReturn(Optional.of(databaseNet));
+        when(userService.findByUsername(eq(username))).thenReturn(user);
+
+        assertThrows(AccessDeniedException.class, () -> netService.markRecovered(netId, username));
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+        verify(userService).findByUsername(eq(username));
+        verify(netRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowAccessDeniedException_whenNoPhoneNumberOnUser_OnMarkRecovered() {
+        // given
+        Long netId = 0L;
+        Long userId = UUID.randomUUID().getMostSignificantBits();
+        String username = "username";
+        User user = new User();
+        user.setUsername(username);
+        user.setId(userId);
+        Net databaseNet = createDefaultNet(netId, NetState.RECOVERY_PENDING);
+        databaseNet.setUser(user);
+
+        //when
+        when(netRepository.findByNetId(any())).thenReturn(Optional.of(databaseNet));
+        when(userService.findByUsername(eq(username))).thenReturn(user);
+
+        assertThrows(AccessDeniedException.class, () -> netService.markRecovered(netId, username));
+
+        // then
+        verify(netRepository).findByNetId(eq(netId));
+        verify(userService).findByUsername(eq(username));
+        verify(netRepository, never()).save(any());
     }
 
     @Test
@@ -263,10 +349,11 @@ class NetServiceTest {
 
         //when
         when(netRepository.findByNetId(any())).thenReturn(Optional.empty());
-        assertThrows(NetNotFoundException.class, () -> netService.markRecovered(netId));
+        assertThrows(NetNotFoundException.class, () -> netService.markRecovered(netId, null));
 
         // then
         verify(netRepository).findByNetId(eq(netId));
+        verify(userService, never()).findByUsername(any());
         verify(netRepository, never()).save(any());
     }
 
@@ -280,9 +367,10 @@ class NetServiceTest {
         when(netRepository.findByNetId(eq(netId))).thenReturn(Optional.of(databaseNet));
 
         // when / then
-        assertThrows(IllegalNetStateChangeException.class, () -> netService.markRecovered(netId));
+        assertThrows(IllegalNetStateChangeException.class, () -> netService.markRecovered(netId, null));
 
         verify(netRepository).findByNetId(eq(netId));
+        verify(userService, never()).findByUsername(any());
         verify(netRepository, never()).save(any());
     }
 

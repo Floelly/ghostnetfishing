@@ -47,7 +47,7 @@ public class NetService implements INetService {
             throw new IllegalNetStateChangeException(id, net.getState(), NetState.RECOVERY_PENDING);
         }
         if(net.getUser() != null){
-            throw new IllegalNetStateException("This net should not have state " + NetState.RECOVERY_PENDING + "and a user");
+            throw new IllegalNetStateException("This net should not have state " + NetState.REPORTED + " and an owner");
         }
         User user = userService.findByUsername(username);
         if(Objects.isNull(user.getPhone()) || user.getPhone().isBlank()){
@@ -64,12 +64,23 @@ public class NetService implements INetService {
     }
 
     @Override
-    public void markRecovered(Long id) {
+    public void markRecovered(Long id, String username) {
         Net net = netRepository.findByNetId(id).orElseThrow(() -> new NetNotFoundException(id));
         if(net.getState().equals(NetState.RECOVERED) || net.getState().equals(NetState.LOST)){
             throw new IllegalNetStateChangeException(id, net.getState(), NetState.RECOVERED);
         }
+        if(net.getState().equals(NetState.RECOVERY_PENDING) && net.getUser() == null){
+            throw new IllegalNetStateException("This net should not have state " + NetState.RECOVERY_PENDING + " and no owner");
+        }
+        User user = userService.findByUsername(username);
+        if(Objects.isNull(user.getPhone()) || user.getPhone().isBlank()){
+            throw new AccessDeniedException("You need to register with a phone number, to use this function");
+        }
+        if(net.getState().equals(NetState.RECOVERY_PENDING) && !net.getUser().getId().equals(user.getId())){
+            throw new AccessDeniedException("You did not request to recover this net this net.");
+        }
         net.setState(NetState.RECOVERED);
+        net.setUser(null);
         netRepository.save(net);
     }
 

@@ -88,8 +88,8 @@ public class NetsController {
     }
 
     @PostMapping("/{id}/mark-recovered")
-    public String markRecovered(@PathVariable long id, RedirectAttributes redirectAttributes) {
-        netService.markRecovered(id);
+    public String markRecovered(@PathVariable long id, RedirectAttributes redirectAttributes, @AuthenticationPrincipal UserDetails userDetails) {
+        netService.markRecovered(id, userDetails.getUsername());
         addSuccessMessage(redirectAttributes, "Marked net " + id + " recovered");
         return "redirect:/nets";
     }

@@ -39,6 +39,7 @@ class NetsControllerTest {
     private static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
     public static final NewNetRequest VALID_NEW_NET_REQUEST = new NewNetRequest(20.0, 20.0, NetSize.L);
     public static final NetDTO VALID_NET_DTO = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING, "Gustav");
+    public static final String USERNAME = "username";
 
     @Mock
     INetService netService;
@@ -131,7 +132,7 @@ class NetsControllerTest {
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onRequestNetRecovery() {
-        when(userDetails.getUsername()).thenReturn("username");
+        when(userDetails.getUsername()).thenReturn(USERNAME);
         doThrow(new RuntimeException()).when(netService).requestRecovery(any(), any());
 
         assertThrows(RuntimeException.class, () ->
@@ -141,33 +142,35 @@ class NetsControllerTest {
     @Test
     void shouldCallServiceAndReturnRedirect_onRequestNetRecovery() {
         Long netId = UUID.randomUUID().getMostSignificantBits();
-        doReturn("username").when(userDetails).getUsername();
-        when(userDetails.getUsername()).thenReturn("username");
-        doNothing().when(netService).requestRecovery(eq(netId), eq("username"));
+        when(userDetails.getUsername()).thenReturn(USERNAME);
+        doNothing().when(netService).requestRecovery(eq(netId), eq(USERNAME));
 
         String controllerResponse = netController.requestNetRecovery(netId, redirectAttributes, userDetails);
 
-        verify(netService).requestRecovery(eq(netId), eq("username"));
+        verify(netService).requestRecovery(eq(netId), eq(USERNAME));
         verify(userDetails).getUsername();
         assertEquals("redirect:" + REQUEST_RECOVERY_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", REQUEST_RECOVERY_REDIRECT_TEMPLATE));
     }
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onMarkNetRecovered() {
-        doThrow(new RuntimeException()).when(netService).markRecovered(any());
+        when(userDetails.getUsername()).thenReturn(USERNAME);
+        doThrow(new RuntimeException()).when(netService).markRecovered(any(), any());
 
         assertThrows(RuntimeException.class, () ->
-                netController.markRecovered(5L, redirectAttributes));
+                netController.markRecovered(5L, redirectAttributes, userDetails));
     }
 
     @Test
     void shouldCallServiceAndReturnRedirect_onMarkNetRecovered () {
         Long netId = UUID.randomUUID().getMostSignificantBits();
-        doNothing().when(netService).markRecovered(eq(netId));
+        when(userDetails.getUsername()).thenReturn(USERNAME);
+        doNothing().when(netService).markRecovered(eq(netId), eq(USERNAME));
 
-        String controllerResponse = netController.markRecovered(netId, redirectAttributes);
+        String controllerResponse = netController.markRecovered(netId, redirectAttributes, userDetails);
 
-        verify(netService).markRecovered(eq(netId));
+        verify(netService).markRecovered(eq(netId), eq(USERNAME));
+        verify(userDetails).getUsername();
         assertEquals("redirect:" + MARK_RECOVERED_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", MARK_RECOVERED_REDIRECT_TEMPLATE));
     }
 

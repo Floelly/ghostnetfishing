@@ -15,7 +15,7 @@ public interface INetService {
 
     List<NetDTO> getAllByState(NetState state);
 
-    void markRecovered(Long id);
+    void markRecovered(Long id, String username);
 
     void markLost(Long id);
 }
