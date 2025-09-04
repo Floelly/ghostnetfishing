@@ -5,6 +5,7 @@ import dev.floelly.ghostnetfishing.dto.NewNetRequest;
 import dev.floelly.ghostnetfishing.model.NetSize;
 import dev.floelly.ghostnetfishing.model.NetState;
 import dev.floelly.ghostnetfishing.service.INetService;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,14 +14,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
+import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,17 +28,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NetsControllerTest {
-    private final static String NEW_NET_CONTENT_TEMPLATE = "/nets/new";
-    private static final String NETS_CONTENT_TEMPLATE = "/nets";
-    private static final String POST_NEW_NET_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
-    private static final String REQUEST_RECOVERY_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
-    private static final String MARK_RECOVERED_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
-    private static final String MARK_LOST_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
-
-    private static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
     public static final NewNetRequest VALID_NEW_NET_REQUEST = new NewNetRequest(20.0, 20.0, NetSize.L);
     public static final NetDTO VALID_NET_DTO = new NetDTO(5L, 20.0, 20.0, NetSize.L, NetState.RECOVERY_PENDING, "Gustav");
-    public static final String USERNAME = "username";
 
     @Mock
     INetService netService;
@@ -49,36 +40,33 @@ class NetsControllerTest {
     @Mock
     RedirectAttributes redirectAttributes;
 
+    @Mock
+    BindingResult bindingResult;
+
+    @Mock
+    Model model;
+
     @InjectMocks
     private NetsController netController;
 
     @Test
-        //TODO: Refactor
     void shouldReturnNewNetsContent_onGetNewNetForm() {
-        Model model = new ExtendedModelMap();
         String controllerResponse = netController.getNewNetFormPage(model);
         assertEquals(NEW_NET_CONTENT_TEMPLATE, controllerResponse, String.format("The response of the controller should be '%s'", NEW_NET_CONTENT_TEMPLATE));
     }
 
     @Test
-        //TODO: Refactor
     void shouldCallServiceAndReturnRedirect_onPostNewNet() {
-        BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
-        Model model = new ExtendedModelMap();
         doNothing().when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
-        String controllerResponse = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model, redirectAttributes);
+        String viewName = netController.postNewNet(VALID_NEW_NET_REQUEST, bindingResult, model, redirectAttributes);
 
         verify(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
-        assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, controllerResponse, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
+        assertEquals("redirect:" + POST_NEW_NET_REDIRECT_TEMPLATE, viewName, String.format("The response of the controller should be a 'redirect:%s'", POST_NEW_NET_REDIRECT_TEMPLATE));
     }
 
     @Test
-    //TODO: Refactor
     void shouldThrowException_whenServiceThrowsException_onPostNewNet(){
-        BindingResult bindingResult = new BeanPropertyBindingResult(VALID_NEW_NET_REQUEST, "newNet");
-        Model model = new ExtendedModelMap();
-
         doThrow(new IllegalArgumentException("invalid net"))
                 .when(netService).addNewNet(eq(VALID_NEW_NET_REQUEST));
 
@@ -87,32 +75,25 @@ class NetsControllerTest {
     }
 
     @Test
-    //TODO: Refactor
     void shouldCallServiceAndReturnNetsContent_onGetNetsPage() {
         Model model = new ExtendedModelMap();
         when(netService.getAll())
                 .thenReturn(List.of(VALID_NET_DTO));
 
-        String controllerResponse = netController.getNetsPage(model, null);
+        String viewName = netController.getNetsPage(model, null);
 
-        verify(netService).getAll();
-        assertEquals(NETS_CONTENT_TEMPLATE, controllerResponse);
-        Object netsAttribute = model.getAttribute(NETS_THYMELEAF_ATTRIBUTE);
-        assertNotNull(netsAttribute);
-        assertInstanceOf(List.class, netsAttribute);
-        @SuppressWarnings("unchecked")
-        List<NetDTO> nets = (List<NetDTO>) netsAttribute;
-        assertTrue(nets.stream().allMatch(Objects::nonNull));
-        assertEquals(1, nets.size());
-        assertThat(nets)
+        assertThat(viewName).isEqualTo(NETS_CONTENT_TEMPLATE);
+        assertThat(model.getAttribute(NETS_THYMELEAF_ATTRIBUTE))
+                .asInstanceOf(InstanceOfAssertFactories.list(NetDTO.class))
+                .hasSize(1)
+                .allMatch(Objects::nonNull)
                 .extracting(NetDTO::getId)
                 .contains(VALID_NET_DTO.getId());
+        verify(netService).getAll();
     }
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onGetNetsPageWithState(){
-        Model model = new ExtendedModelMap();
-
         doThrow(new RuntimeException()).when(netService).getAllByState(eq(NetState.RECOVERY_PENDING));
 
         assertThrows(RuntimeException.class, () ->
@@ -121,8 +102,6 @@ class NetsControllerTest {
 
     @Test
     void shouldThrowException_whenServiceThrowsException_onGetNetsPage(){
-        Model model = new ExtendedModelMap();
-
         doThrow(new RuntimeException()).when(netService).getAll();
 
         assertThrows(RuntimeException.class, () ->
@@ -132,6 +111,7 @@ class NetsControllerTest {
     @Test
     void shouldThrowException_whenServiceThrowsException_onRequestNetRecovery() {
         when(userDetails.getUsername()).thenReturn(USERNAME);
+
         doThrow(new RuntimeException()).when(netService).requestRecovery(any(), any());
 
         assertThrows(RuntimeException.class, () ->
@@ -140,7 +120,7 @@ class NetsControllerTest {
 
     @Test
     void shouldCallServiceAndReturnRedirect_onRequestNetRecovery() {
-        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Long netId = getRandomNetId();
         when(userDetails.getUsername()).thenReturn(USERNAME);
         doNothing().when(netService).requestRecovery(eq(netId), eq(USERNAME));
 
@@ -162,7 +142,7 @@ class NetsControllerTest {
 
     @Test
     void shouldCallServiceAndReturnRedirect_onMarkNetRecovered () {
-        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Long netId = getRandomNetId();
         when(userDetails.getUsername()).thenReturn(USERNAME);
         doNothing().when(netService).markRecovered(eq(netId), eq(USERNAME));
 
@@ -183,7 +163,7 @@ class NetsControllerTest {
 
     @Test
     void shouldCallServiceAndReturnRedirect_onMarkNetLost () {
-        Long netId = UUID.randomUUID().getMostSignificantBits();
+        Long netId = getRandomNetId();
         doNothing().when(netService).markLost(eq(netId));
 
         String controllerResponse = netController.markLost(netId, redirectAttributes);

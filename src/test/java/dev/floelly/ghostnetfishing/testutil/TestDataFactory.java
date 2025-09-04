@@ -42,6 +42,16 @@ public final class TestDataFactory {
     public static final String MARK_NET_RECOVERED_ENDPOINT = "/nets/%d/mark-recovered";
     public static final String MARK_NET_LOST_ENDPOINT = "/nets/%d/mark-lost";
 
+    //Thymeleaf templates & attributes
+    public static final String NEW_NET_CONTENT_TEMPLATE = NETS_NEW_ENDPOINT;
+    public static final String NETS_CONTENT_TEMPLATE = NETS_ENDPOINT;
+    public static final String POST_NEW_NET_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    public static final String REQUEST_RECOVERY_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    public static final String MARK_RECOVERED_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    public static final String MARK_LOST_REDIRECT_TEMPLATE = NETS_CONTENT_TEMPLATE;
+    public static final String NETS_THYMELEAF_ATTRIBUTE = "nets";
+
+
     //db implementation info
     public static final String DB_COLUMN_LATITUDE = "location_lat";
     public static final String DB_COLUMN_LONGITUDE = "location_long";

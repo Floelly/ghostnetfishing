@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static dev.floelly.ghostnetfishing.testutil.TestDataFactory.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class NewNetRequestValidationTest {
@@ -20,20 +21,13 @@ class NewNetRequestValidationTest {
     private static final Stream<Double> VALID_LATITUDES = Stream.of(-90.0, 5.000000000001, 90.0);
     private static final Stream<Double> INVALID_LONGITUDES = Stream.of(-180.1, 180.0000001, null);
     private static final Stream<Double> VALID_LONGITUDES = Stream.of(-180.0, -32.123456, 180.0);
-    public static final String FIELD_NAME_LONGITUDE = "locationLong";
-    public static final String FIELD_NAME_LATITUDE = "locationLat";
+    public static final double VALID_LATITUDE = 0.0;
+    public static final double VALID_LONGITUDE = 0.0;
+    public static final NetSize VALID_SIZE = NetSize.L;
 
     private static Validator validator;
 
     private NewNetRequest defaultValidRequest;
-
-    private static Stream<Double> provideInvalidLatitudes() {
-        return INVALID_LATITUDES;
-    }
-
-    public static Stream<Double> provideValidLatitudes() {
-        return VALID_LATITUDES;
-    }
 
     @BeforeAll
     static void beforeAll() {
@@ -52,7 +46,7 @@ class NewNetRequestValidationTest {
 
     @BeforeEach
     void setUp() {
-        defaultValidRequest = new NewNetRequest(0.0, 0.0, NetSize.L);
+        defaultValidRequest = new NewNetRequest(VALID_LATITUDE, VALID_LONGITUDE, VALID_SIZE);
     }
 
     @ParameterizedTest
@@ -64,7 +58,7 @@ class NewNetRequestValidationTest {
 
         assertThat(violations).isNotEmpty();
         assertThat(violations.stream().map(v -> v.getPropertyPath().toString()))
-                .contains(FIELD_NAME_LATITUDE);
+                .contains(LOCATION_LAT);
     }
 
     @ParameterizedTest
@@ -86,7 +80,7 @@ class NewNetRequestValidationTest {
 
         assertThat(violations).isNotEmpty();
         assertThat(violations.stream().map(v -> v.getPropertyPath().toString()))
-                .contains(FIELD_NAME_LONGITUDE);
+                .contains(LOCATION_LONG);
     }
 
     @ParameterizedTest
@@ -97,5 +91,13 @@ class NewNetRequestValidationTest {
         Set<ConstraintViolation<NewNetRequest>> violations = validator.validate(defaultValidRequest);
 
         assertThat(violations).isEmpty();
+    }
+
+    private static Stream<Double> provideInvalidLatitudes() {
+        return INVALID_LATITUDES;
+    }
+
+    public static Stream<Double> provideValidLatitudes() {
+        return VALID_LATITUDES;
     }
 }
