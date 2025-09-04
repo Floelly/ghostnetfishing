@@ -28,7 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/", "/nets", "/nets/new").permitAll()
                         .requestMatchers(HttpMethod.POST, "/nets/new").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/nets/{id}/*").hasRole(Role.STANDARD.name())
+                        .requestMatchers(HttpMethod.POST, "/nets/{id}/mark-lost").hasRole(Role.STANDARD.name())
+                        .requestMatchers(HttpMethod.POST, "/nets/{id}/*").hasRole(Role.RECOVERER.name())
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
