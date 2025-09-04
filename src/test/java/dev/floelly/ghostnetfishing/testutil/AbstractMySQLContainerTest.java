@@ -56,7 +56,7 @@ public abstract class AbstractMySQLContainerTest {
             while(rs.next()){
                 String table = rs.getString("TABLE_NAME");
                 // behalte users und authorities
-                if(table.equals("users") || table.equals("authorities")){
+                if(table.equals("users") || table.equals("authorities") || table.equals("user_roles")){
                     continue;
                 }
                 stmt.execute("TRUNCATE TABLE " + table);
