@@ -1,7 +1,14 @@
 package dev.floelly.ghostnetfishing.testutil;
 
+import dev.floelly.ghostnetfishing.model.Net;
+import dev.floelly.ghostnetfishing.model.NetSize;
+import dev.floelly.ghostnetfishing.model.NetState;
+import dev.floelly.ghostnetfishing.model.User;
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -83,6 +90,31 @@ public final class TestDataFactory {
     public static final String[] ILLEGAL_STATE_CHANGE_TOAST_MESSAGE = {"state"};
 
     //generate random values
+    public static @NotNull Net createDefaultNet(NetState netState) {
+        Net net = new Net(
+                null,
+                getRandomNetId(),
+                Double.valueOf(getRandomLatitude()),
+                Double.valueOf(getRandomLongitude()),
+                NetSize.valueOf(getRandomNetSize()),
+                netState,
+                null);
+        if(netState.equals(NetState.RECOVERY_PENDING)) {
+            net.setUser(createDefaultUser());
+        }
+        return net;
+    }
+    public static @NotNull User createDefaultUser() {
+        User user = new User();
+        user.setUsername(getRandomUserName());
+        user.setPassword("secret");
+        user.setPhone("123456789");
+        user.setUserId(getRandomUserId());
+        user.setId(getRandomUserId());
+        user.setRoles(new HashSet<>());
+        user.setEnabled(true);
+        return user;
+    }
     public static String getRandomLongitude() {
         double d = ThreadLocalRandom.current().nextDouble(-180, 180);
         return formatDouble(d);
@@ -96,6 +128,14 @@ public final class TestDataFactory {
     }
     public static long getRandomNetId() {
         return ThreadLocalRandom.current().nextLong();
+    }
+    public static long getRandomUserId() {
+        return ThreadLocalRandom.current().nextLong();
+    }
+    public static String getRandomUserName() {
+        return new java.util.Random().ints(10, 33, 127)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
     private static String formatDouble(double d) {
         return getDoubleFormat().format(d);

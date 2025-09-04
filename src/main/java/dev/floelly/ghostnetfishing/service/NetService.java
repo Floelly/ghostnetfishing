@@ -77,7 +77,7 @@ public class NetService implements INetService {
             throw new AccessDeniedException("You need to register with a phone number, to use this function");
         }
         if(net.getState().equals(NetState.RECOVERY_PENDING) && !net.getUser().getId().equals(user.getId())){
-            throw new AccessDeniedException("You did not request to recover this net this net.");
+            throw new AccessDeniedException("You did not request to recover this net.");
         }
         net.setState(NetState.RECOVERED);
         net.setUser(null);
