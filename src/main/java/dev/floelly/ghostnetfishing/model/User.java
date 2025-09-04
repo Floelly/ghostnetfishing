@@ -40,4 +40,17 @@ public class User {
     @CollectionTable(name="user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
+
+    public User(Long userId, String username, String password, String phone, boolean enabled, Set<Role> roles) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.phone = phone;
+        this.enabled = enabled;
+        this.roles = roles;
+    }
+
+    public User copy() {
+        return new User(this.userId, this.username, this.password, this.phone, this.enabled, this.roles);
+    }
 }

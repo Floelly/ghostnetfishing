@@ -5,18 +5,16 @@ import dev.floelly.ghostnetfishing.dto.ToastType;
 import dev.floelly.ghostnetfishing.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 @Configuration
@@ -45,17 +43,24 @@ public class SecurityConfig {
                             response.sendRedirect("/nets");
                         })
                         .permitAll()
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            FlashMap flashMap = new FlashMap();
+                            flashMap.put("toastMessages", List.of(
+                                    new ToastMessageResponse("You do not have permission to perform this action.", ToastType.WARNING)
+                            ));
+                            new SessionFlashMapManager().saveOutputFlashMap(flashMap, request, response);
+
+                            response.sendRedirect("/nets");
+                        })
                 );
 
         return http.build();
     }
 
     @Bean
-    public UserDetailsManager userDetailsManager(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
-    }
-
-    @Bean
+    @Profile("!mysql-container-test & !h2-test")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
